@@ -1,11 +1,15 @@
 FROM php:8.2-apache
 
+# NOWOŚĆ: Zmiana DocumentRoot na folder public (standard dla nowoczesnych aplikacji)
+ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
 # 1. Pakiety systemowe dla Composera
 RUN apt-get update && apt-get install -y git unzip libzip-dev && docker-php-ext-install zip
 
-# 2. Włączenie mod_rewrite dla Apache (żeby działały ścieżki)
+# 2. Włączenie mod_rewrite dla Apache
 RUN a2enmod rewrite
-RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
 # 3. Instalacja Composera
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -13,7 +17,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 # 4. Kopiowanie Twojego kodu na serwer
 COPY . /var/www/html/
 
-# 5. MAGIA: Pobieranie bibliotek (To utworzy brakujący folder vendor!)
+# 5. Pobieranie bibliotek (Slim, Twig)
 WORKDIR /var/www/html
 RUN composer install --no-dev --optimize-autoloader
 

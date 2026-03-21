@@ -5,10 +5,14 @@ use Psr\Http\Message\ResponseInterface as Response;
 
 // Default session values
 if (isset($_SESSION['user_id'])) {
-    if (!isset($_SESSION['theme_color'])) $_SESSION['theme_color'] = '#D4F67B';
-    if (!isset($_SESSION['language'])) $_SESSION['language'] = 'pl';
-    if (!isset($_SESSION['theme_mode'])) $_SESSION['theme_mode'] = 'light';
-    if (!isset($_SESSION['avatar'])) $_SESSION['avatar'] = '👤';
+    if (!isset($_SESSION['theme_color']))
+        $_SESSION['theme_color'] = '#D4F67B';
+    if (!isset($_SESSION['language']))
+        $_SESSION['language'] = 'pl';
+    if (!isset($_SESSION['theme_mode']))
+        $_SESSION['theme_mode'] = 'light';
+    if (!isset($_SESSION['avatar']))
+        $_SESSION['avatar'] = '👤';
 }
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
@@ -21,11 +25,14 @@ require __DIR__ . '/../src/Helpers.php';
 
 // Prepare directories
 $dataDir = __DIR__ . '/../data';
-if (!is_dir($dataDir)) mkdir($dataDir, 0777, true);
+if (!is_dir($dataDir))
+    mkdir($dataDir, 0777, true);
 
 $uploadsDir = __DIR__ . '/uploads';
-if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0777, true);
-if (!is_dir($uploadsDir . '/avatars')) mkdir($uploadsDir . '/avatars', 0777, true);
+if (!is_dir($uploadsDir))
+    mkdir($uploadsDir, 0777, true);
+if (!is_dir($uploadsDir . '/avatars'))
+    mkdir($uploadsDir . '/avatars', 0777, true);
 
 // Database connection
 $dbPath = $dataDir . '/database.sqlite';
@@ -42,7 +49,7 @@ $pdo->exec("PRAGMA foreign_keys = ON;");
 
 // Slim App
 $app = AppFactory::create();
-$app->setBasePath('/grocy');
+// $app->setBasePath('/grocy');
 
 // Twig
 $twig = Twig::create(__DIR__ . '/../templates', ['cache' => false]);
@@ -83,7 +90,7 @@ $app->get('/', function (Request $request, Response $response) {
 
 // Moduły Chronione (Aplikacja Głównego Asystenta)
 $app->group('', function (\Slim\Routing\RouteCollectorProxy $group) use ($pdo) {
-    
+
     $group->get('/dashboard', function (Request $request, Response $response) use ($pdo) {
         return Twig::fromRequest($request)->render($response, 'dashboard.twig', [
             'dashboard' => getDashboardData($pdo, $_SESSION['user_id']),
