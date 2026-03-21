@@ -32,10 +32,21 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         $tgroup = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$tgroup) return $response->withHeader('Location', '/grocy/tasks')->withStatus(302);
 
-        $stmt2 = $pdo->prepare("SELECT * FROM tasks WHERE group_id = ? ORDER BY is_completed ASC, due_date ASC");
+        $stmt2 = $pdo->prepare("SELECT t.*, tg.name as group_name FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.group_id = ? ORDER BY t.is_completed ASC, t.due_date ASC");
         $stmt2->execute([$id]);
+        $tasks = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
+        $grouped = [];
+        if (!empty($tasks)) {
+            $grouped[$tasks[0]['group_name']] = $tasks;
+        } else {
+            $grouped[$tgroup['name']] = [];
+        }
+
         return Twig::fromRequest($request)->render($response, 'task_group_view.twig', [
-            'group' => $tgroup, 'tasks' => $stmt2->fetchAll(PDO::FETCH_ASSOC), 'active_tab' => 'tasks'
+            'group' => $tgroup, 
+            'grouped_tasks' => $grouped, 
+            'active_tab' => 'tasks'
         ]);
     });
 
@@ -55,9 +66,16 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
                 $pdo->prepare("INSERT INTO tasks (group_id, title, description, color, due_date, image) VALUES (?, ?, ?, ?, ?, ?)")->execute([$id, $title, $description, $color, $due_date, $image]);
             }
         }
-        $stmt2 = $pdo->prepare("SELECT * FROM tasks WHERE group_id = ? ORDER BY is_completed ASC, due_date ASC");
+        $stmt2 = $pdo->prepare("SELECT t.*, tg.name as group_name FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.group_id = ? ORDER BY t.is_completed ASC, t.due_date ASC");
         $stmt2->execute([$id]);
-        return Twig::fromRequest($request)->render($response, 'partials/tasks_items.twig', ['tasks' => $stmt2->fetchAll(PDO::FETCH_ASSOC), 'group' => ['id' => $id]]);
+        $tasks = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+        
+        $grouped = [];
+        if (!empty($tasks)) {
+            $grouped[$tasks[0]['group_name']] = $tasks;
+        }
+
+        return Twig::fromRequest($request)->render($response, 'partials/tasks_items.twig', ['grouped_tasks' => $grouped]);
     });
     
     $group->delete('/tasks/task/{id}', function (Request $request, Response $response, $args) use ($pdo) {
@@ -68,9 +86,23 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
             deleteUploadedFile($task['image']);
             $pdo->prepare("DELETE FROM tasks WHERE id = ?")->execute([$id]);
             $g_id = $task['group_id'];
-            $stmt3 = $pdo->prepare("SELECT * FROM tasks WHERE group_id = ? ORDER BY is_completed ASC, due_date ASC");
+            
+            $stmt3 = $pdo->prepare("SELECT t.*, tg.name as group_name FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.group_id = ? ORDER BY t.is_completed ASC, t.due_date ASC");
             $stmt3->execute([$g_id]);
-            return Twig::fromRequest($request)->render($response, 'partials/tasks_items.twig', ['tasks' => $stmt3->fetchAll(PDO::FETCH_ASSOC), 'group' => ['id' => $g_id]]);
+            $tasks = $stmt3->fetchAll(PDO::FETCH_ASSOC);
+            
+            $grouped = [];
+            if (!empty($tasks)) {
+                $grouped[$tasks[0]['group_name']] = $tasks;
+            } else {
+                // Fetch group name even if no tasks left
+                $st = $pdo->prepare("SELECT name FROM task_groups WHERE id = ?");
+                $st->execute([$g_id]);
+                $g_name = $st->fetchColumn();
+                $grouped[$g_name] = [];
+            }
+
+            return Twig::fromRequest($request)->render($response, 'partials/tasks_items.twig', ['grouped_tasks' => $grouped]);
         }
         return $response->withStatus(404);
     });
@@ -120,9 +152,17 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         if ($task = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $pdo->prepare("UPDATE tasks SET is_completed = ? WHERE id = ?")->execute([$task['is_completed'] ? 0 : 1, $id]);
             $group_id = $task['group_id'];
-            $stmt3 = $pdo->prepare("SELECT * FROM tasks WHERE group_id = ? ORDER BY is_completed ASC, due_date ASC");
+            
+            $stmt3 = $pdo->prepare("SELECT t.*, tg.name as group_name FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.group_id = ? ORDER BY t.is_completed ASC, t.due_date ASC");
             $stmt3->execute([$group_id]);
-            return Twig::fromRequest($request)->render($response, 'partials/tasks_items.twig', ['tasks' => $stmt3->fetchAll(PDO::FETCH_ASSOC), 'group' => ['id' => $group_id]]);
+            $tasks = $stmt3->fetchAll(PDO::FETCH_ASSOC);
+            
+            $grouped = [];
+            if (!empty($tasks)) {
+                $grouped[$tasks[0]['group_name']] = $tasks;
+            }
+
+            return Twig::fromRequest($request)->render($response, 'partials/tasks_items.twig', ['grouped_tasks' => $grouped]);
         }
         return $response->withStatus(404);
     });

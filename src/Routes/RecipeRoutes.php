@@ -4,11 +4,23 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
 
 return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
-    $group->get('/recipes', function (Request $request, Response $response) use ($pdo) {
-        return Twig::fromRequest($request)->render($response, 'recipes.twig', ['recipes' => getRecipes($pdo, $_SESSION['user_id']), 'active_tab' => 'recipes']);
+    $category_emojis = [
+        'Śniadanie' => '🍳',
+        'Obiad' => '🍝',
+        'Kolacja' => '🥗',
+        'Deser' => '🍰',
+        'Inne' => '🍴'
+    ];
+
+    $group->get('/recipes', function (Request $request, Response $response) use ($pdo, $category_emojis) {
+        return Twig::fromRequest($request)->render($response, 'recipes.twig', [
+            'grouped_recipes' => getRecipes($pdo, $_SESSION['user_id']),
+            'category_emojis' => $category_emojis,
+            'active_tab' => 'recipes'
+        ]);
     });
 
-    $group->post('/recipes', function (Request $request, Response $response) use ($pdo) {
+    $group->post('/recipes', function (Request $request, Response $response) use ($pdo, $category_emojis) {
         $data = $request->getParsedBody();
         $title = trim($data['title'] ?? '');
         $instructions = trim($data['instructions'] ?? '');
@@ -19,7 +31,10 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
             $stmt = $pdo->prepare("INSERT INTO recipes (title, instructions, category, image, user_id) VALUES (?, ?, ?, ?, ?)");
             $stmt->execute([$title, $instructions, $category, $image, $_SESSION['user_id']]);
         }
-        return Twig::fromRequest($request)->render($response, 'partials/recipes_content.twig', ['recipes' => getRecipes($pdo, $_SESSION['user_id'])]);
+        return Twig::fromRequest($request)->render($response, 'partials/recipes_content.twig', [
+            'grouped_recipes' => getRecipes($pdo, $_SESSION['user_id']),
+            'category_emojis' => $category_emojis
+        ]);
     });
 
     $group->delete('/recipes/{id}', function (Request $request, Response $response, $args) use ($pdo) {
@@ -76,8 +91,16 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
 
         $stmt2 = $pdo->prepare("SELECT * FROM recipe_ingredients WHERE recipe_id = ? ORDER BY id ASC");
         $stmt2->execute([$id]);
+        $ingredients = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+
+        if ($request->hasHeader('HX-Request')) {
+            return Twig::fromRequest($request)->render($response, 'partials/recipe_detail.twig', [
+                'recipe' => $recipe, 'ingredients' => $ingredients
+            ]);
+        }
+
         return Twig::fromRequest($request)->render($response, 'recipe_view.twig', [
-            'recipe' => $recipe, 'ingredients' => $stmt2->fetchAll(PDO::FETCH_ASSOC), 'active_tab' => 'recipes'
+            'recipe' => $recipe, 'ingredients' => $ingredients, 'active_tab' => 'recipes'
         ]);
     });
 

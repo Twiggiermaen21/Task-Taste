@@ -8,7 +8,9 @@
             
             <div class="grid grid-cols-1 gap-4">
                 {% for recipe in items %}
-                    <div class="bg-white dark:bg-[#1A1D1F] rounded-[32px] p-4 flex gap-4 shadow-sm border border-gray-100/50 dark:border-white/5 hover:shadow-md transition-shadow group relative overflow-hidden">
+                    <div class="bg-white dark:bg-[#1A1D1F] rounded-[32px] p-4 flex gap-4 shadow-sm border border-gray-100/50 dark:border-white/5 hover:shadow-md transition-all group relative overflow-hidden cursor-pointer"
+                         hx-get="/grocy/recipes/{{ recipe.id }}" 
+                         hx-target="#recipe-modal-body">
                         {% if recipe.image %}
                             <div class="w-24 h-24 rounded-[24px] bg-gray-100 dark:bg-gray-800 shrink-0 bg-cover bg-center border border-gray-100 dark:border-white/5" style="background-image: url('/grocy/uploads/{{ recipe.image }}')"></div>
                         {% else %}
@@ -23,7 +25,7 @@
                         </div>
 
                         <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <a href="/grocy/recipes/{{ recipe.id }}/edit" class="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-app-black dark:text-white border border-gray-100 dark:border-white/5 shadow-sm">
+                            <a href="/grocy/recipes/{{ recipe.id }}/edit" onclick="event.stopPropagation()" class="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-app-black dark:text-white border border-gray-100 dark:border-white/5 shadow-sm">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                             </a>
                         </div>
