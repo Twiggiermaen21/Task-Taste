@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS users (
     is_admin INTEGER DEFAULT 0,
     theme_color TEXT DEFAULT '#D4F67B',
     language TEXT DEFAULT 'pl',
-    avatar TEXT DEFAULT '👤'
+    avatar TEXT DEFAULT '👤',
+    theme_mode TEXT DEFAULT 'light'
 );
 CREATE TABLE IF NOT EXISTS stores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

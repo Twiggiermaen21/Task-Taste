@@ -1,5 +1,5 @@
 <?php
-$db = new PDO('sqlite:data/grocy.db');
+$db = new PDO('sqlite:data/database.sqlite');
 try {
     $db->exec("ALTER TABLE users ADD COLUMN theme_mode TEXT DEFAULT 'light'");
     echo "Column 'theme_mode' added successfully.\n";
