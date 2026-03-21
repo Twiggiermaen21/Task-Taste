@@ -11,7 +11,7 @@
     <main class="container">
         <h1>🛒 Lista zakupów</h1>
 
-        <form hx-post="/grocy/dodaj" 
+        <form hx-post="/dodaj" 
               hx-target="#lista-zakupow" 
               hx-select="#lista-zakupow" 
               hx-swap="outerHTML" 
@@ -27,7 +27,7 @@
                 <li>
                     <label>
                         <input type="checkbox" 
-                               hx-post="/grocy/zmien/{{ przedmiot.id }}" 
+                               hx-post="/zmien/{{ przedmiot.id }}" 
                                hx-target="#lista-zakupow" 
                                hx-select="#lista-zakupow" 
                                hx-swap="outerHTML"

@@ -1,5 +1,5 @@
 {% if recipe.image %}
-<div class="w-full h-64 rounded-[40px] bg-gray-100 mb-6 bg-cover bg-center shadow-inner relative overflow-hidden" style="background-image: url('/grocy/uploads/{{ recipe.image }}')">
+<div class="w-full h-64 rounded-[40px] bg-gray-100 mb-6 bg-cover bg-center shadow-inner relative overflow-hidden" style="background-image: url('/uploads/{{ recipe.image }}')">
     <div class="absolute inset-0 bg-gradient-to-t from-app-black/90 via-app-black/20 to-transparent flex items-end p-6">
         <h2 class="text-white text-[32px] font-black tracking-tighter leading-tight relative z-10">{{ recipe.title }}</h2>
     </div>
@@ -15,7 +15,7 @@
     </div>
 
     <div class="flex items-center gap-2 mt-2">
-        <a href="/grocy/recipes/{{ recipe.id }}/edit" class="bg-gray-100 dark:bg-gray-800 text-app-black dark:text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Edytuj">
+        <a href="/recipes/{{ recipe.id }}/edit" class="bg-gray-100 dark:bg-gray-800 text-app-black dark:text-white w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Edytuj">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
         </a>
     </div>
@@ -41,7 +41,7 @@
 </div>
 
 <!-- Ingredients Form (Only for modal or view) -->
-<form hx-post="/grocy/recipes/{{ recipe.id }}/ingredient" hx-target="#ingredients-list" class="mt-6" onsubmit="setTimeout(()=>this.reset(), 10)">
+<form hx-post="/recipes/{{ recipe.id }}/ingredient" hx-target="#ingredients-list" class="mt-6" onsubmit="setTimeout(()=>this.reset(), 10)">
     <div class="relative flex items-center bg-white dark:bg-gray-800 rounded-full p-2 pr-2 shadow-sm border border-gray-100/50 dark:border-white/5">
         <input type="text" name="name" placeholder="Dodaj składnik..." required class="flex-1 bg-transparent border-none outline-none font-bold text-app-black dark:text-white placeholder-gray-400 py-3 px-4 text-[14px]">
         <button type="submit" class="bg-app-black dark:bg-app-accent text-white dark:text-app-black px-6 py-3.5 rounded-full font-bold uppercase tracking-widest text-[10px] shrink-0 active:scale-95 transition-transform">

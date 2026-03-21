@@ -6,7 +6,7 @@
     <h2 class="text-[36px] font-black text-app-black dark:text-white tracking-tighter leading-none">{{ __('modify_recipe') }}</h2>
 </div>
 
-<form action="/grocy/recipes/{{ recipe.id }}/edit" method="post" enctype="multipart/form-data" class="bg-white dark:bg-[#1A1D1F] rounded-[32px] p-6 shadow-sm border border-gray-100/50 dark:border-white/5 space-y-6">
+<form action="/recipes/{{ recipe.id }}/edit" method="post" enctype="multipart/form-data" class="bg-white dark:bg-[#1A1D1F] rounded-[32px] p-6 shadow-sm border border-gray-100/50 dark:border-white/5 space-y-6">
     <div>
         <label class="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ __('recipe_title_label') }}</label>
         <input type="text" name="title" value="{{ recipe.title }}" required class="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl border-none outline-none font-bold text-app-black dark:text-white px-4 py-3 text-[16px] focus:ring-2 focus:ring-app-black dark:focus:ring-app-accent transition-all shadow-inner">
@@ -31,7 +31,7 @@
     <div>
         <label class="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ __('recipe_image_label') }}</label>
         {% if recipe.image %}
-            <div class="w-full h-40 rounded-2xl bg-gray-100 dark:bg-gray-800 bg-cover bg-center mb-3 shadow-inner border border-gray-100 dark:border-white/5" style="background-image: url('/grocy/uploads/{{ recipe.image }}')"></div>
+            <div class="w-full h-40 rounded-2xl bg-gray-100 dark:bg-gray-800 bg-cover bg-center mb-3 shadow-inner border border-gray-100 dark:border-white/5" style="background-image: url('/uploads/{{ recipe.image }}')"></div>
         {% else %}
             <div class="w-full h-24 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center border-2 border-dashed border-gray-200 dark:border-white/10 mb-3">
                 <span class="text-[13px] text-gray-400 dark:text-gray-500 font-bold">{{ __('upload_own') }}</span>

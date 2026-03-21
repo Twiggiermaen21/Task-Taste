@@ -11,7 +11,7 @@
             <div class="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-3 rounded-xl text-sm mb-6 text-center border border-red-100 dark:border-red-900/30">{{ error }}</div>
         {% endif %}
 
-        <form action="/grocy/register" method="post" class="flex flex-col gap-6">
+        <form action="/register" method="post" class="flex flex-col gap-6">
             <div>
                 <label class="block text-[10px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider mb-2">{{ __('email') }}</label>
                 <input type="email" name="email" required class="material-input text-base" placeholder="twój@email.com">
@@ -31,7 +31,7 @@
         </form>
 
         <p class="mt-6 text-center text-sm text-slate-500 dark:text-gray-400">
-            {{ __('have_account') }} <a href="/grocy/login" class="text-app-accent font-bold hover:underline" style="color: var(--app-accent)">{{ __('sign_in') }}</a>
+            {{ __('have_account') }} <a href="/login" class="text-app-accent font-bold hover:underline" style="color: var(--app-accent)">{{ __('sign_in') }}</a>
         </p>
     </div>
 </div>

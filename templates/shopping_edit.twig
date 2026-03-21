@@ -6,7 +6,7 @@
     <h2 class="text-[36px] font-black text-app-black dark:text-white tracking-tighter leading-none">{{ __('modify_store') }}</h2>
 </div>
 
-<form action="/grocy/shopping/store/{{ store.id }}/edit" method="post" class="bg-white dark:bg-[#1A1D1F] rounded-[32px] p-6 shadow-sm border border-gray-100/50 dark:border-white/5 space-y-6">
+<form action="/shopping/store/{{ store.id }}/edit" method="post" class="bg-white dark:bg-[#1A1D1F] rounded-[32px] p-6 shadow-sm border border-gray-100/50 dark:border-white/5 space-y-6">
     <div>
         <label class="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ __('store_name') }}</label>
         <input type="text" name="name" value="{{ store.name }}" required class="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl border-none outline-none font-bold text-app-black dark:text-white px-4 py-3 text-[16px] focus:ring-2 focus:ring-app-black dark:focus:ring-app-accent transition-all shadow-inner">
