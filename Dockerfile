@@ -1,20 +1,28 @@
-# 1. Wybieramy oficjalny, lekki obraz PHP z wbudowanym serwerem Apache
 FROM php:8.2-apache
 
-# 2. Włączamy moduł Rewrite w Apache (niezbędny dla naszego Slim Framework i pliku .htaccess)
-RUN a2enmod rewrite
+# 1. Pakiety systemowe dla Composera
+RUN apt-get update && apt-get install -y git unzip libzip-dev && docker-php-ext-install zip
 
-# 3. Zezwalamy Apache na czytanie naszych reguł z pliku .htaccess
+# 2. Włączenie mod_rewrite dla Apache (żeby działały ścieżki)
+RUN a2enmod rewrite
 RUN sed -i '/<Directory \/var\/www\/>/,/<\/Directory>/ s/AllowOverride None/AllowOverride All/' /etc/apache2/apache2.conf
 
-# 4. Kopiujemy wszystkie pliki z Twojego komputera do głównego folderu serwera w kontenerze
+# 3. Instalacja Composera
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# 4. Kopiowanie Twojego kodu na serwer
 COPY . /var/www/html/
 
-# 5. Tworzymy folder 'data' (jeśli go nie ma) i dajemy serwerowi pełne uprawnienia, 
-# żeby mógł tam tworzyć i edytować plik bazy SQLite
-RUN mkdir -p /var/www/html/data \
-    && chown -R www-data:www-data /var/www/html/data \
-    && chmod -R 775 /var/www/html/data
+# 5. MAGIA: Pobieranie bibliotek (To utworzy brakujący folder vendor!)
+WORKDIR /var/www/html
+RUN composer install --no-dev --optimize-autoloader
 
-# 6. Informujemy, że aplikacja działa na porcie 80
+# 6. Tworzenie folderów na dane i zdjęcia z odpowiednimi uprawnieniami
+RUN mkdir -p /var/www/html/data \
+    && mkdir -p /var/www/html/public/uploads \
+    && chown -R www-data:www-data /var/www/html/data \
+    && chown -R www-data:www-data /var/www/html/public/uploads \
+    && chmod -R 775 /var/www/html/data \
+    && chmod -R 775 /var/www/html/public/uploads
+
 EXPOSE 80
