@@ -5,8 +5,11 @@ ENV APACHE_DOCUMENT_ROOT /var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf
 RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
 
-# 1. Pakiety systemowe dla Composera
-RUN apt-get update && apt-get install -y git unzip libzip-dev && docker-php-ext-install zip
+# 1. Pakiety systemowe dla Composera i bazy MongoDB
+RUN apt-get update && apt-get install -y git unzip libzip-dev libssl-dev \
+    && pecl install mongodb \
+    && docker-php-ext-enable mongodb \
+    && docker-php-ext-install zip
 
 # 2. Włączenie mod_rewrite dla Apache
 RUN a2enmod rewrite
