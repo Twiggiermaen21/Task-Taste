@@ -38,6 +38,9 @@ $app->setBasePath('/grocy');
 // Twig
 $twig = Twig::create(__DIR__ . '/../templates', ['cache' => false]);
 $twig->getEnvironment()->addGlobal('session', $_SESSION);
+$twig->getEnvironment()->addFunction(new \Twig\TwigFunction('__', function ($key) {
+    return __($key);
+}));
 $app->add(TwigMiddleware::create($app, $twig));
 $app->addErrorMiddleware(true, true, true);
 
@@ -83,6 +86,7 @@ $app->group('', function (\Slim\Routing\RouteCollectorProxy $group) use ($pdo) {
     (require __DIR__ . '/../src/Routes/ShoppingRoutes.php')($group, $pdo);
     (require __DIR__ . '/../src/Routes/RecipeRoutes.php')($group, $pdo);
     (require __DIR__ . '/../src/Routes/TaskRoutes.php')($group, $pdo);
+    (require __DIR__ . '/../src/Routes/SettingsRoutes.php')($group, $pdo);
 
 })->add($authMiddleware);
 

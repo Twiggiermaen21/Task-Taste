@@ -1,20 +1,35 @@
-<div class="grid grid-cols-2 gap-3 pb-24">
-    {% for recipe in recipes %}
-        <a href="/grocy/recipes/{{ recipe.id }}" class="bg-white rounded-[28px] p-5 aspect-square relative overflow-hidden flex flex-col hover:scale-[1.03] transition-transform active:scale-95 shadow-sm border border-gray-100/50 group">
+<div class="flex flex-col gap-8 pb-24">
+    {% for category, items in recipes %}
+        <div>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-app-black font-black text-[13px] shadow-inner">
+                    {% if category == 'Śniadanie' %}🥐{% elseif category == 'Obiad' %}🍲{% elseif category == 'Kolacja' %}🌙{% elseif category == 'Deser' %}🍰{% else %}🍳{% endif %}
+                </div>
+                <h3 class="text-[20px] font-black tracking-tight text-app-black">{{ category }}</h3>
+            </div>
             
-            {% if recipe.image %}
-                <!-- Background image low opacity -->
-                <div class="absolute inset-0 bg-cover bg-center opacity-30 grayscale group-hover:grayscale-[50%] transition-all z-0" style="background-image: url('/grocy/uploads/{{ recipe.image }}')"></div>
-            {% endif %}
+            <div class="grid grid-cols-2 gap-3">
+                {% for recipe in items %}
+                    <a href="/grocy/recipes/{{ recipe.id }}" class="bg-white rounded-[28px] p-5 aspect-square relative overflow-hidden flex flex-col hover:scale-[1.03] transition-transform active:scale-95 shadow-sm border border-gray-100/50 group">
+                        
+                        {% if recipe.image %}
+                            <!-- Background image low opacity -->
+                            <div class="absolute inset-0 bg-cover bg-center opacity-30 grayscale group-hover:grayscale-[50%] transition-all z-0" style="background-image: url('/grocy/uploads/{{ recipe.image }}')"></div>
+                        {% endif %}
 
-            <div class="w-12 h-12 rounded-full bg-app-yellow/80 backdrop-blur-sm flex items-center justify-center mb-auto group-hover:-rotate-12 transition-transform shadow-[0_4px_10px_rgba(0,0,0,0.1)] relative z-10">
-                <span class="text-xl">🍳</span>
+                        <div class="w-12 h-12 rounded-full bg-app-yellow/80 backdrop-blur-sm flex items-center justify-center mb-auto group-hover:-rotate-12 transition-transform shadow-[0_4px_10px_rgba(0,0,0,0.1)] relative z-10">
+                            <span class="text-xl">
+                                {% if recipe.category == 'Śniadanie' %}🥐{% elseif recipe.category == 'Obiad' %}🍲{% elseif recipe.category == 'Kolacja' %}🌙{% elseif recipe.category == 'Deser' %}🍰{% else %}🍳{% endif %}
+                            </span>
+                        </div>
+                        
+                        <div class="mt-4 relative z-10 bg-white/70 backdrop-blur-md p-2 -mx-2 -mb-2 rounded-xl">
+                            <h3 class="text-[15px] font-black text-app-black tracking-tight leading-tight line-clamp-2 drop-shadow-md">{{ recipe.title }}</h3>
+                        </div>
+                    </a>
+                {% endfor %}
             </div>
-            
-            <div class="mt-4 relative z-10 bg-white/70 backdrop-blur-md p-2 -mx-2 -mb-2 rounded-xl">
-                <h3 class="text-[15px] font-black text-app-black tracking-tight leading-tight line-clamp-2 drop-shadow-md">{{ recipe.title }}</h3>
-            </div>
-        </a>
+        </div>
     {% else %}
         <div class="col-span-2 bg-white rounded-3xl p-8 text-center border border-gray-100/50 shadow-sm mt-4">
             <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">

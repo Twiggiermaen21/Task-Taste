@@ -73,7 +73,24 @@ function getStores(PDO $pdo, int $userId): array {
 function getRecipes(PDO $pdo, int $userId): array {
     $stmt = $pdo->prepare("SELECT * FROM recipes WHERE user_id = ? ORDER BY id DESC");
     $stmt->execute([$userId]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $all = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $grouped = [
+        'Śniadanie' => [],
+        'Obiad' => [],
+        'Kolacja' => [],
+        'Deser' => [],
+        'Inne' => []
+    ];
+    
+    foreach($all as $r) {
+        $cat = $r['category'] ?: 'Inne';
+        if (!isset($grouped[$cat])) $cat = 'Inne';
+        $grouped[$cat][] = $r;
+    }
+    
+    // Remove empty categories
+    return array_filter($grouped, function($items) { return count($items) > 0; });
 }
 
 function getTaskGroups(PDO $pdo, int $userId): array {

@@ -2,33 +2,19 @@
 {% block header_title %}Edycja: {{ store.name|slice(0, 15) }}{% endblock %}
 {% block content %}
 <div class="mb-8 mt-2">
-    <div class="inline-block bg-app-lime px-4 py-1.5 rounded-full mb-3 text-black text-[11px] font-black uppercase tracking-widest shadow-sm">Edytor</div>
-    <h2 class="text-[36px] font-black text-app-black tracking-tighter leading-none">Modyfikuj</h2>
+    <div class="inline-block bg-app-lime px-4 py-1.5 rounded-full mb-3 text-black text-[11px] font-black uppercase tracking-widest shadow-sm">Korekta</div>
+    <h2 class="text-[36px] font-black text-app-black tracking-tighter leading-none">Modyfikuj Sklep</h2>
 </div>
 
-<form action="/grocy/shopping/store/{{ store.id }}/edit" method="post" enctype="multipart/form-data" class="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100/50 space-y-6">
+<form action="/grocy/shopping/store/{{ store.id }}/edit" method="post" class="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100/50 space-y-6">
     <div>
         <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Nazwa Sklepu</label>
         <input type="text" name="name" value="{{ store.name }}" required class="w-full bg-gray-50 rounded-2xl border-none outline-none font-bold text-app-black px-4 py-3 text-[16px] focus:ring-2 focus:ring-app-black transition-all shadow-inner">
     </div>
     
-    <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Obecne Zdjęcie</label>
-        {% if store.image %}
-            <div class="w-full h-32 rounded-2xl bg-gray-100 bg-cover bg-center mb-3 shadow-inner" style="background-image: url('/grocy/uploads/{{ store.image }}')"></div>
-            <p class="text-[12px] text-gray-500 font-medium mb-2">Wczytaj nowy plik aby je podmienić.</p>
-        {% else %}
-            <div class="w-full h-24 rounded-2xl bg-gray-50 flex items-center justify-center border-2 border-dashed border-gray-200 mb-3">
-                <span class="text-[13px] text-gray-400 font-bold">Brak oprawy graficznej</span>
-            </div>
-        {% endif %}
-        
-        <input type="file" name="image" accept="image/*" class="text-[12px] text-gray-600 file:mr-4 file:py-2 file:px-6 file:rounded-[20px] file:border-0 file:text-[12px] file:font-bold file:bg-app-black file:text-white hover:file:bg-gray-800 transition-colors w-full cursor-pointer outline-none">
-    </div>
-    
     <div class="pt-4">
         <button type="submit" class="w-full bg-app-lime text-black py-4 rounded-full font-black uppercase tracking-widest text-[13px] hover:-translate-y-1 active:scale-95 transition-transform shadow-[0_8px_20px_rgba(212,246,123,0.4)]">
-            Zaktualizuj
+            Zaktualizuj Skrót
         </button>
     </div>
 </form>

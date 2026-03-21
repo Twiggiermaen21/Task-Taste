@@ -24,7 +24,10 @@ return function ($app, PDO $pdo) {
             }
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
-            $_SESSION['is_admin'] = $user['is_admin'];
+            $_SESSION['is_admin'] = (bool)$user['is_admin'];
+            $_SESSION['theme_color'] = $user['theme_color'];
+            $_SESSION['language'] = $user['language'];
+            $_SESSION['avatar'] = $user['avatar'];
             return $response->withHeader('Location', '/grocy/dashboard')->withStatus(302);
         }
         return Twig::fromRequest($request)->render($response, 'auth/login.twig', ['error' => 'Nieprawidłowy e-mail lub hasło.']);

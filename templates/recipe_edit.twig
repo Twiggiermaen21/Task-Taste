@@ -14,7 +14,18 @@
 
     <div>
         <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Sposób przygotowania</label>
-        <textarea name="instructions" class="w-full bg-gray-50 rounded-2xl border-none outline-none font-medium text-app-black px-4 py-3 text-[14px] focus:ring-2 focus:ring-app-black transition-all shadow-inner resize-none h-32">{{ recipe.instructions }}</textarea>
+        <textarea name="instructions" class="w-full bg-gray-50 rounded-2xl border-none outline-none font-medium text-app-black px-4 py-3 text-[14px] focus:ring-2 focus:ring-app-black transition-all shadow-inner resize-none h-28">{{ recipe.instructions }}</textarea>
+    </div>
+    
+    <div>
+        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Rodzaj Posiłku</label>
+        <select name="category" class="w-full bg-gray-50 rounded-2xl border-none outline-none font-bold text-app-black px-4 py-3 text-[15px] focus:ring-2 focus:ring-app-black transition-all shadow-inner appearance-none cursor-pointer">
+            <option value="Śniadanie" {% if recipe.category == 'Śniadanie' %}selected{% endif %}>🥐 Śniadanie</option>
+            <option value="Obiad" {% if recipe.category == 'Obiad' %}selected{% endif %}>🍲 Obiad</option>
+            <option value="Kolacja" {% if recipe.category == 'Kolacja' %}selected{% endif %}>🌙 Kolacja</option>
+            <option value="Deser" {% if recipe.category == 'Deser' %}selected{% endif %}>🍰 Deser</option>
+            <option value="Inne" {% if recipe.category == 'Inne' %}selected{% endif %}>🍳 Inne</option>
+        </select>
     </div>
     
     <div>

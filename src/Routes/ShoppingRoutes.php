@@ -14,11 +14,10 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
     $group->post('/shopping/store', function (Request $request, Response $response) use ($pdo) {
         $data = $request->getParsedBody();
         $name = trim($data['name'] ?? '');
-        $image = handleUpload($request, 'image');
         
         if ($name !== '') {
-            $stmt = $pdo->prepare("INSERT INTO stores (name, image, user_id) VALUES (?, ?, ?)");
-            $stmt->execute([$name, $image, $_SESSION['user_id']]);
+            $stmt = $pdo->prepare("INSERT INTO stores (name, user_id) VALUES (?, ?)");
+            $stmt->execute([$name, $_SESSION['user_id']]);
         }
         return Twig::fromRequest($request)->render($response, 'partials/shopping_content.twig', [
             'stores' => getStores($pdo, $_SESSION['user_id'])
@@ -27,10 +26,15 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
 
     $group->delete('/shopping/store/{id}', function (Request $request, Response $response, $args) use ($pdo) {
         $id = (int) $args['id'];
-        $stmt = $pdo->prepare("SELECT image FROM stores WHERE id = ? AND user_id = ?");
+        $stmt = $pdo->prepare("SELECT id FROM stores WHERE id = ? AND user_id = ?");
         $stmt->execute([$id, $_SESSION['user_id']]);
         if ($store = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            deleteUploadedFile($store['image']);
+            // Delete all item images associated with this store
+            $stmtItems = $pdo->prepare("SELECT image FROM shopping_items WHERE store_id = ?");
+            $stmtItems->execute([$id]);
+            while($img = $stmtItems->fetchColumn()) {
+                deleteUploadedFile($img);
+            }
             $pdo->prepare("DELETE FROM stores WHERE id = ?")->execute([$id]);
         }
         return $response->withHeader('HX-Redirect', '/grocy/shopping')->withStatus(302);
@@ -38,19 +42,12 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
 
     $group->post('/shopping/store/{id}/edit', function (Request $request, Response $response, $args) use ($pdo) {
         $id = (int) $args['id'];
-        $stmt = $pdo->prepare("SELECT image FROM stores WHERE id = ? AND user_id = ?");
+        $stmt = $pdo->prepare("SELECT id FROM stores WHERE id = ? AND user_id = ?");
         $stmt->execute([$id, $_SESSION['user_id']]);
         if ($store = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $data = $request->getParsedBody();
             $name = trim($data['name'] ?? '');
-            $newImage = handleUpload($request, 'image');
-
-            if ($newImage) {
-                deleteUploadedFile($store['image']);
-                $pdo->prepare("UPDATE stores SET name = ?, image = ? WHERE id = ?")->execute([$name, $newImage, $id]);
-            } else {
-                $pdo->prepare("UPDATE stores SET name = ? WHERE id = ?")->execute([$name, $id]);
-            }
+            $pdo->prepare("UPDATE stores SET name = ? WHERE id = ?")->execute([$name, $id]);
         }
         return $response->withHeader('Location', '/grocy/shopping/' . $id)->withStatus(302);
     });
@@ -90,11 +87,62 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         $check->execute([$store_id, $_SESSION['user_id']]);
         if ($check->fetch()) {
             $name = trim($request->getParsedBody()['name'] ?? '');
-            if ($name !== '') $pdo->prepare("INSERT INTO shopping_items (store_id, name) VALUES (?, ?)")->execute([$store_id, $name]);
+            $image = handleUpload($request, 'image');
+            if ($name !== '') {
+                $pdo->prepare("INSERT INTO shopping_items (store_id, name, image) VALUES (?, ?, ?)")->execute([$store_id, $name, $image]);
+            }
         }
         $stmt2 = $pdo->prepare("SELECT * FROM shopping_items WHERE store_id = ? ORDER BY is_completed ASC, id DESC");
         $stmt2->execute([$store_id]);
         return Twig::fromRequest($request)->render($response, 'partials/shopping_items.twig', ['items' => $stmt2->fetchAll(PDO::FETCH_ASSOC), 'store' => ['id' => $store_id]]);
+    });
+
+    $group->delete('/shopping/item/{id}', function (Request $request, Response $response, $args) use ($pdo) {
+        $id = (int) $args['id'];
+        $stmt = $pdo->prepare("SELECT si.image, si.store_id FROM shopping_items si JOIN stores s ON si.store_id = s.id WHERE si.id = ? AND s.user_id = ?");
+        $stmt->execute([$id, $_SESSION['user_id']]);
+        if ($item = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            deleteUploadedFile($item['image']);
+            $pdo->prepare("DELETE FROM shopping_items WHERE id = ?")->execute([$id]);
+            $store_id = $item['store_id'];
+            $stmt3 = $pdo->prepare("SELECT * FROM shopping_items WHERE store_id = ? ORDER BY is_completed ASC, id DESC");
+            $stmt3->execute([$store_id]);
+            return Twig::fromRequest($request)->render($response, 'partials/shopping_items.twig', ['items' => $stmt3->fetchAll(PDO::FETCH_ASSOC), 'store' => ['id' => $store_id]]);
+        }
+        return $response->withStatus(404);
+    });
+
+    $group->get('/shopping/item/{id}/edit', function (Request $request, Response $response, $args) use ($pdo) {
+        $id = (int) $args['id'];
+        $stmt = $pdo->prepare("SELECT si.*, s.user_id FROM shopping_items si JOIN stores s ON si.store_id = s.id WHERE si.id = ? AND s.user_id = ?");
+        $stmt->execute([$id, $_SESSION['user_id']]);
+        $item = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$item) return $response->withHeader('Location', '/grocy/shopping')->withStatus(302);
+        
+        return Twig::fromRequest($request)->render($response, 'shopping_item_edit.twig', [
+            'item' => $item,
+            'active_tab' => 'shopping'
+        ]);
+    });
+
+    $group->post('/shopping/item/{id}/edit', function (Request $request, Response $response, $args) use ($pdo) {
+        $id = (int) $args['id'];
+        $stmt = $pdo->prepare("SELECT si.image, si.store_id FROM shopping_items si JOIN stores s ON si.store_id = s.id WHERE si.id = ? AND s.user_id = ?");
+        $stmt->execute([$id, $_SESSION['user_id']]);
+        if ($item = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $data = $request->getParsedBody();
+            $name = trim($data['name'] ?? '');
+            $newImage = handleUpload($request, 'image');
+
+            if ($newImage) {
+                deleteUploadedFile($item['image']);
+                $pdo->prepare("UPDATE shopping_items SET name = ?, image = ? WHERE id = ?")->execute([$name, $newImage, $id]);
+            } else {
+                $pdo->prepare("UPDATE shopping_items SET name = ? WHERE id = ?")->execute([$name, $id]);
+            }
+            return $response->withHeader('Location', '/grocy/shopping/' . $item['store_id'])->withStatus(302);
+        }
+        return $response->withStatus(404);
     });
 
     $group->patch('/shopping/item/{id}/toggle', function (Request $request, Response $response, $args) use ($pdo) {

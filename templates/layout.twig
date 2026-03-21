@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Osobisty Asystent</title>
+    <title>Task&Taste</title>
+<link rel="icon" type="image/png" href="/grocy/favicon.png?v=1">
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +21,7 @@
                     colors: {
                         'app-bg': '#F8F5F2',
                         'app-black': '#0F0F0F',
-                        'app-lime': '#D4F67B',
+                        'app-lime': '{{ session.theme_color|default("#D4F67B") }}',
                         'app-purple': '#E2D5FC',
                         'app-yellow': '#FFF4CA',
                         'app-pink': '#FFDBDE',
@@ -132,9 +133,13 @@
                 <h1 class="text-xl font-bold tracking-tight">{% block header_title %}Wstecz{% endblock %}</h1>
             </div>
             {% if session.user_id %}
-                <div class="w-10 h-10 rounded-full bg-app-black text-white flex items-center justify-center font-bold shadow-md cursor-pointer hover:bg-gray-800" onclick="window.location.href='/grocy/logout'">
-                    {{ session.username|first|upper }}
-                </div>
+                <a href="/grocy/settings" class="w-10 h-10 rounded-full bg-app-black text-white flex items-center justify-center font-bold shadow-md cursor-pointer hover:bg-gray-800 transition-all active:scale-90 overflow-hidden">
+                    {% if session.avatar and session.avatar|length > 2 %}
+                        <div class="w-full h-full bg-cover bg-center" style="background-image: url('/grocy/uploads/{{ session.avatar }}')"></div>
+                    {% else %}
+                        {{ session.avatar|default(session.username|first|upper) }}
+                    {% endif %}
+                </a>
             {% endif %}
         </header>
         {% endif %}

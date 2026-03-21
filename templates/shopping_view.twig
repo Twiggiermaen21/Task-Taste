@@ -2,23 +2,11 @@
 {% block header_title %}{{ store.name|slice(0, 15) }}{% if store.name|length > 15 %}...{% endif %}{% endblock %}
 {% block content %}
 
-{% if store.image %}
-<div class="w-full h-48 rounded-[36px] bg-gray-100 mb-6 bg-cover bg-center shadow-inner relative overflow-hidden" style="background-image: url('/grocy/uploads/{{ store.image }}')">
-    <div class="absolute inset-0 bg-gradient-to-t from-app-black/60 to-transparent flex items-end p-6">
-        <h2 class="text-white text-[32px] font-black tracking-tighter leading-none relative z-10">{{ store.name }}</h2>
-    </div>
-</div>
-{% endif %}
-
-<div class="mb-8 flex justify-between items-start">
+<div class="mb-8 flex justify-between items-start mt-2">
     <div>
         <div class="inline-block bg-app-lime px-4 py-1.5 rounded-full mb-3 text-black text-[11px] font-black uppercase tracking-widest shadow-sm">Lista Zakupów</div>
-        
-        {% if not store.image %}
-            <h2 class="text-[40px] font-black text-app-black tracking-tighter leading-none">{{ store.name }}</h2>
-        {% endif %}
+        <h2 class="text-[40px] font-black text-app-black tracking-tighter leading-none">{{ store.name }}</h2>
     </div>
-    
     <div class="flex items-center gap-2 mt-2">
         <a href="/grocy/shopping/{{ store.id }}/edit" class="bg-gray-100 text-app-black w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" title="Edytuj">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
@@ -29,12 +17,17 @@
     </div>
 </div>
 
-<form hx-post="/grocy/shopping/{{ store.id }}/item" hx-target="#shopping-items" class="mb-10" onsubmit="setTimeout(()=>this.reset(), 10)">
-    <div class="relative flex items-center bg-white rounded-full p-2 pr-2 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100/50">
-        <input type="text" name="name" placeholder="Co kupujesz?" required class="flex-1 bg-transparent border-none outline-none font-bold text-app-black placeholder-gray-400 py-4 px-5 text-[16px]">
-        <button type="submit" class="bg-app-black text-white px-7 py-4 rounded-full font-bold uppercase tracking-widest text-[12px] flex items-center gap-2 shrink-0 hover:-translate-y-0.5 active:scale-95 transition-transform shadow-[0_4px_14px_rgba(0,0,0,0.15)]">
-            DODAJ <span class="tracking-tighter font-black">>></span>
-        </button>
+<form hx-post="/grocy/shopping/{{ store.id }}/item" hx-encoding="multipart/form-data" hx-target="#shopping-items" class="mb-10" onsubmit="setTimeout(()=>this.reset(), 10)">
+    <div class="relative flex flex-col bg-white rounded-[32px] p-2 pr-2 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100/50 focus-within:ring-2 focus-within:ring-app-black transition-all">
+        <div class="flex items-center w-full">
+            <input type="text" name="name" placeholder="Co kupujesz?" required class="flex-1 bg-transparent border-none outline-none font-bold text-app-black placeholder-gray-400 py-4 px-5 text-[16px]">
+            <button type="submit" class="bg-app-black text-white px-7 py-4 rounded-full font-bold uppercase tracking-widest text-[12px] flex items-center gap-2 shrink-0 hover:-translate-y-0.5 active:scale-95 transition-transform shadow-[0_4px_14px_rgba(0,0,0,0.15)]">
+                DODAJ <span class="tracking-tighter font-black">>></span>
+            </button>
+        </div>
+        <div class="px-4 pb-2">
+            <input type="file" name="image" accept="image/*" class="text-[11px] text-gray-500 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-[11px] file:font-bold file:bg-gray-50 file:text-app-black hover:file:bg-gray-100 transition-colors w-full cursor-pointer outline-none">
+        </div>
     </div>
 </form>
 

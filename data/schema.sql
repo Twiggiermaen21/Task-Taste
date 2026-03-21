@@ -1,10 +1,13 @@
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT NOT NULL UNIQUE,
-    email TEXT UNIQUE,
+    email TEXT NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
+    is_active INTEGER DEFAULT 1,
     is_admin INTEGER DEFAULT 0,
-    is_active INTEGER DEFAULT 1
+    theme_color TEXT DEFAULT '#D4F67B',
+    language TEXT DEFAULT 'pl',
+    avatar TEXT DEFAULT '👤'
 );
 CREATE TABLE IF NOT EXISTS stores (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,6 +20,7 @@ CREATE TABLE IF NOT EXISTS shopping_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     store_id INTEGER,
     name TEXT NOT NULL,
+    image TEXT,
     is_completed INTEGER DEFAULT 0,
     FOREIGN KEY(store_id) REFERENCES stores(id) ON DELETE CASCADE
 );
@@ -25,6 +29,7 @@ CREATE TABLE IF NOT EXISTS recipes (
     user_id INTEGER,
     title TEXT NOT NULL,
     instructions TEXT,
+    category TEXT,
     image TEXT,
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
