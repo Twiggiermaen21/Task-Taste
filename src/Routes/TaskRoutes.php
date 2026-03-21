@@ -46,7 +46,8 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         return Twig::fromRequest($request)->render($response, 'task_group_view.twig', [
             'group' => $tgroup, 
             'grouped_tasks' => $grouped, 
-            'active_tab' => 'tasks'
+            'active_tab' => 'tasks',
+            'is_detail_view' => true
         ]);
     });
 

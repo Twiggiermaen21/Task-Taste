@@ -11,7 +11,8 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
 
         return Twig::fromRequest($request)->render($response, 'settings.twig', [
             'user_pref' => $user,
-            'active_tab' => 'settings'
+            'active_tab' => 'settings',
+            'is_detail_view' => true
         ]);
     });
 

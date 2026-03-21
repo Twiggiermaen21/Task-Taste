@@ -100,8 +100,12 @@
                     <span class="text-[12px] text-gray-500 dark:text-gray-400 font-semibold block">{{ task.group_name }}</span>
                 </div>
                 
-                <div class="font-extrabold text-[15px] tracking-tight text-app-black dark:text-white">
-                    {{ task.due_date|date('M d') }}
+                <div class="font-extrabold text-[13px] tracking-tight text-app-black dark:text-white shrink-0">
+                    {% if task.due_date and task.due_date != '' %}
+                        {{ task.due_date|date('M d') }}
+                    {% else %}
+                        <span class="opacity-20 flex items-center justify-center w-8 h-8 rounded-full border border-current text-[10px]">∞</span>
+                    {% endif %}
                 </div>
             </a>
         {% else %}

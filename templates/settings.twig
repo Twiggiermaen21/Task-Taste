@@ -14,14 +14,12 @@
             <div class="flex flex-wrap gap-3">
                 {% set colors = ['#D4F67B', '#E2D5FC', '#FFF4CA', '#FFDBDE', '#D9E8FE', '#0F0F0F'] %}
                 {% for color in colors %}
-                    <label class="relative cursor-pointer group">
-                        <input type="radio" name="theme_color" value="{{ color }}" class="sr-only" {% if user_pref.theme_color == color %}checked{% endif %}>
-                        <div class="w-12 h-12 rounded-full border-4 transition-all group-hover:scale-110 shadow-sm {% if user_pref.theme_color == color %}border-app-black dark:border-white ring-4 ring-app-accent/30{% else %}border-white dark:border-gray-800{% endif %}" style="background-color: {{ color }};">
-                            {% if user_pref.theme_color == color %}
-                                <div class="absolute inset-0 flex items-center justify-center">
-                                    <svg class="w-6 h-6 {% if color == '#0F0F0F' %}text-white{% else %}text-app-black{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                                </div>
-                            {% endif %}
+                    <label class="relative cursor-pointer group js-color-option">
+                        <input type="radio" name="theme_color" value="{{ color }}" class="sr-only" {% if user_pref.theme_color == color %}checked{% endif %} onchange="updateSettingsUI()">
+                        <div class="js-color-preview w-12 h-12 rounded-full border-4 transition-all group-hover:scale-110 shadow-sm {% if user_pref.theme_color == color %}border-app-black dark:border-white ring-4 ring-app-accent/30{% else %}border-white dark:border-gray-800{% endif %}" style="background-color: {{ color }};">
+                            <div class="js-check-icon absolute inset-0 flex items-center justify-center {% if user_pref.theme_color != color %}hidden{% endif %}">
+                                <svg class="w-6 h-6 {% if color == '#0F0F0F' %}text-white{% else %}text-app-black{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
                         </div>
                     </label>
                 {% endfor %}
@@ -41,28 +39,24 @@
     <div>
         <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">{{ __('appearance_mode') }}</label>
         <div class="grid grid-cols-2 gap-3">
-            <label class="relative cursor-pointer group">
-                <input type="radio" name="theme_mode" value="light" class="sr-only" {% if user_pref.theme_mode == 'light' %}checked{% endif %}>
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl py-4 px-4 flex flex-col items-center justify-center gap-2 border-4 transition-all {% if user_pref.theme_mode == 'light' %}border-app-accent bg-app-accent/10 shadow-md scale-[1.02]{% else %}border-transparent opacity-60 grayscale-[0.5]{% endif %}">
+            <label class="relative cursor-pointer group js-mode-option">
+                <input type="radio" name="theme_mode" value="light" class="sr-only" {% if user_pref.theme_mode == 'light' %}checked{% endif %} onchange="updateSettingsUI()">
+                <div class="js-mode-preview bg-gray-50 dark:bg-gray-800 rounded-2xl py-4 px-4 flex flex-col items-center justify-center gap-2 border-4 transition-all {% if user_pref.theme_mode == 'light' %}border-app-accent bg-app-accent/10 shadow-md scale-[1.02]{% else %}border-transparent opacity-60 grayscale-[0.5]{% endif %}">
                     <span class="text-2xl">☀️</span>
                     <span class="font-black text-xs uppercase tracking-widest text-app-black dark:text-white">{{ __('light_mode') }}</span>
-                    {% if user_pref.theme_mode == 'light' %}
-                        <div class="absolute top-2 right-2 w-5 h-5 bg-app-accent rounded-full flex items-center justify-center">
-                            <svg class="w-3 h-3 text-app-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-                    {% endif %}
+                    <div class="js-check-icon absolute top-2 right-2 w-5 h-5 bg-app-accent rounded-full flex items-center justify-center {% if user_pref.theme_mode != 'light' %}hidden{% endif %}">
+                        <svg class="w-3 h-3 text-app-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
                 </div>
             </label>
-            <label class="relative cursor-pointer group">
-                <input type="radio" name="theme_mode" value="dark" class="sr-only" {% if user_pref.theme_mode == 'dark' %}checked{% endif %}>
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl py-4 px-4 flex flex-col items-center justify-center gap-2 border-4 transition-all {% if user_pref.theme_mode == 'dark' %}border-app-accent bg-app-accent/10 shadow-md scale-[1.02]{% else %}border-transparent opacity-60 grayscale-[0.5]{% endif %}">
+            <label class="relative cursor-pointer group js-mode-option">
+                <input type="radio" name="theme_mode" value="dark" class="sr-only" {% if user_pref.theme_mode == 'dark' %}checked{% endif %} onchange="updateSettingsUI()">
+                <div class="js-mode-preview bg-gray-50 dark:bg-gray-800 rounded-2xl py-4 px-4 flex flex-col items-center justify-center gap-2 border-4 transition-all {% if user_pref.theme_mode == 'dark' %}border-app-accent bg-app-accent/10 shadow-md scale-[1.02]{% else %}border-transparent opacity-60 grayscale-[0.5]{% endif %}">
                     <span class="text-2xl">🌙</span>
                     <span class="font-black text-xs uppercase tracking-widest text-app-black dark:text-white">{{ __('dark_mode') }}</span>
-                    {% if user_pref.theme_mode == 'dark' %}
-                        <div class="absolute top-2 right-2 w-5 h-5 bg-app-accent rounded-full flex items-center justify-center">
-                            <svg class="w-3 h-3 text-app-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                        </div>
-                    {% endif %}
+                    <div class="js-check-icon absolute top-2 right-2 w-5 h-5 bg-app-accent rounded-full flex items-center justify-center {% if user_pref.theme_mode != 'dark' %}hidden{% endif %}">
+                        <svg class="w-3 h-3 text-app-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="4"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
                 </div>
             </label>
         </div>
@@ -77,16 +71,14 @@
             <div class="flex flex-wrap gap-2">
                 {% set icons = ['👤', '🥘', '🛒', '⚡', '🌟', '🥕', '🍕', '🍰'] %}
                 {% for icon in icons %}
-                    <label class="relative cursor-pointer group">
-                        <input type="radio" name="avatar" value="{{ icon }}" class="sr-only" {% if user_pref.avatar == icon %}checked{% endif %}>
-                        <div class="w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-2xl border-4 transition-all hover:bg-gray-100 dark:hover:bg-gray-700 {% if user_pref.avatar == icon %}border-app-accent bg-app-accent/10 shadow-md scale-110{% else %}border-transparent opacity-60{% endif %}">
+                    <label class="relative cursor-pointer group js-avatar-option">
+                        <input type="radio" name="avatar" value="{{ icon }}" class="sr-only" {% if user_pref.avatar == icon %}checked{% endif %} onchange="updateSettingsUI()">
+                        <div class="js-avatar-preview w-12 h-12 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center text-2xl border-4 transition-all hover:bg-gray-100 dark:hover:bg-gray-700 {% if user_pref.avatar == icon %}border-app-accent bg-app-accent/10 shadow-md scale-110{% else %}border-transparent opacity-60{% endif %}">
                             {{ icon }}
                         </div>
-                        {% if user_pref.avatar == icon %}
-                            <div class="absolute -top-1 -right-1 w-4 h-4 bg-app-accent rounded-full flex items-center justify-center shadow-sm">
-                                <svg class="w-2.5 h-2.5 text-app-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
-                            </div>
-                        {% endif %}
+                        <div class="js-check-icon absolute -top-1 -right-1 w-4 h-4 bg-app-accent rounded-full flex items-center justify-center shadow-sm {% if user_pref.avatar != icon %}hidden{% endif %}">
+                            <svg class="w-2.5 h-2.5 text-app-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
                     </label>
                 {% endfor %}
             </div>
@@ -119,4 +111,58 @@
         </div>
     </div>
 </div>
+<script>
+function updateSettingsUI() {
+    // 1. Update Color Options
+    document.querySelectorAll('.js-color-option').forEach(option => {
+        const input = option.querySelector('input');
+        const preview = option.querySelector('.js-color-preview');
+        const check = option.querySelector('.js-check-icon');
+        
+        if (input.checked) {
+            preview.classList.remove('border-white', 'dark:border-gray-800');
+            preview.classList.add('border-app-black', 'dark:border-white', 'ring-4', 'ring-app-accent/30');
+            check.classList.remove('hidden');
+        } else {
+            preview.classList.add('border-white', 'dark:border-gray-800');
+            preview.classList.remove('border-app-black', 'dark:border-white', 'ring-4', 'ring-app-accent/30');
+            check.classList.add('hidden');
+        }
+    });
+
+    // 2. Update Mode Options
+    document.querySelectorAll('.js-mode-option').forEach(option => {
+        const input = option.querySelector('input');
+        const preview = option.querySelector('.js-mode-preview');
+        const check = option.querySelector('.js-check-icon');
+        
+        if (input.checked) {
+            preview.classList.remove('border-transparent', 'opacity-60', 'grayscale-[0.5]');
+            preview.classList.add('border-app-accent', 'bg-app-accent/10', 'shadow-md', 'scale-[1.02]');
+            check.classList.remove('hidden');
+        } else {
+            preview.classList.add('border-transparent', 'opacity-60', 'grayscale-[0.5]');
+            preview.classList.remove('border-app-accent', 'bg-app-accent/10', 'shadow-md', 'scale-[1.02]');
+            check.classList.add('hidden');
+        }
+    });
+
+    // 3. Update Avatar Options
+    document.querySelectorAll('.js-avatar-option').forEach(option => {
+        const input = option.querySelector('input');
+        const preview = option.querySelector('.js-avatar-preview');
+        const check = option.querySelector('.js-check-icon');
+        
+        if (input.checked) {
+            preview.classList.remove('border-transparent', 'opacity-60');
+            preview.classList.add('border-app-accent', 'bg-app-accent/10', 'shadow-md', 'scale-110');
+            check.classList.remove('hidden');
+        } else {
+            preview.classList.add('border-transparent', 'opacity-60');
+            preview.classList.remove('border-app-accent', 'bg-app-accent/10', 'shadow-md', 'scale-110');
+            check.classList.add('hidden');
+        }
+    });
+}
+</script>
 {% endblock %}

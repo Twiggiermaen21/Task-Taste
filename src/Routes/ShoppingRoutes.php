@@ -64,7 +64,8 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         return Twig::fromRequest($request)->render($response, 'shopping_view.twig', [
             'store' => $store,
             'items' => $stmt2->fetchAll(PDO::FETCH_ASSOC),
-            'active_tab' => 'shopping'
+            'active_tab' => 'shopping',
+            'is_detail_view' => true
         ]);
     });
     
@@ -77,7 +78,8 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         
         return Twig::fromRequest($request)->render($response, 'shopping_edit.twig', [
             'store' => $store,
-            'active_tab' => 'shopping'
+            'active_tab' => 'shopping',
+            'is_detail_view' => true
         ]);
     });
 
@@ -121,7 +123,8 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         
         return Twig::fromRequest($request)->render($response, 'shopping_item_edit.twig', [
             'item' => $item,
-            'active_tab' => 'shopping'
+            'active_tab' => 'shopping',
+            'is_detail_view' => true
         ]);
     });
 

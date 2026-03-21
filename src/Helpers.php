@@ -50,9 +50,11 @@ function getDashboardData(PDO $pdo, int $userId): array {
         SELECT t.id, t.title, t.due_date, t.color, tg.name as group_name, tg.id as group_id
         FROM tasks t
         JOIN task_groups tg ON t.group_id = tg.id
-        WHERE tg.user_id = ? AND t.is_completed = 0 AND t.due_date != '' AND t.due_date IS NOT NULL
-        ORDER BY t.due_date ASC
-        LIMIT 5
+        WHERE tg.user_id = ? AND t.is_completed = 0
+        ORDER BY 
+            CASE WHEN (t.due_date IS NULL OR t.due_date = '') THEN 1 ELSE 0 END, 
+            t.due_date ASC
+        LIMIT 10
     ");
     $stmt->execute([$userId]);
     $urgentTasks = $stmt->fetchAll(PDO::FETCH_ASSOC);

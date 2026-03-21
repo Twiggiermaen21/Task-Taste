@@ -57,7 +57,8 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         
         return Twig::fromRequest($request)->render($response, 'recipe_edit.twig', [
             'recipe' => $recipe,
-            'active_tab' => 'recipes'
+            'active_tab' => 'recipes',
+            'is_detail_view' => true
         ]);
     });
     
@@ -100,7 +101,10 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         }
 
         return Twig::fromRequest($request)->render($response, 'recipe_view.twig', [
-            'recipe' => $recipe, 'ingredients' => $ingredients, 'active_tab' => 'recipes'
+            'recipe' => $recipe, 
+            'ingredients' => $ingredients, 
+            'active_tab' => 'recipes',
+            'is_detail_view' => true
         ]);
     });
 
