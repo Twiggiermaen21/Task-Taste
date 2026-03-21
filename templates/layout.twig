@@ -1,236 +1,322 @@
 <!DOCTYPE html>
 <html lang="pl" class="{% if session.theme_mode == 'dark' %}dark{% endif %}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Task&Taste</title>
-<link rel="icon" type="image/png" href="/favicon.png?v=1">
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    colors: {
-                        'app-bg': '#F8F5F2',
-                        'app-black': '#0F1113',
-                        'app-lime': '{{ session.theme_color|default("#D4F67B") }}',
-                        'app-accent': '{{ session.theme_color|default("#D4F67B") }}',
-                        'app-purple': '#E2D5FC',
-                        'app-yellow': '#FFF4CA',
-                        'app-pink': '#FFDBDE',
-                        'app-blue': '#D9E8FE',
-                    },
-                    borderRadius: {
-                        '4xl': '2rem',
-                        '5xl': '2.5rem',
-                        '6xl': '3rem',
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@1.9.11"></script>
-    <style>
-        :root {
-            --app-accent: {{ session.theme_color|default("#D4F67B") }};
-        }
-        body { 
-            background-color: #F8F5F2; 
-            color: #0F1113;
-        }
-        .dark body { 
-            background-color: #0F1113; 
-            color: #F8F5F2;
-        }
-        
-        #app-container { 
-            background-color: #F8F5F2; 
-        }
-        .dark #app-container { 
-            background-color: #1A1D1F; 
-        }
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<meta name="htmx-config" content='{"globalViewTransitions":"true"}'>
+		<title>Task&Taste</title>
+		<link
+		rel="icon" type="image/png" href="/favicon.png?v=1">
+		<!-- Fonts -->
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link
+		href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+		<!-- Tailwind CSS -->
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script>
+			tailwind.config = {
+darkMode: 'class',
+theme: {
+extend: {
+fontFamily: {
+sans: ['Inter', 'sans-serif']
+},
+colors: {
+'app-bg': '#F8F5F2',
+'app-black': '#0F1113',
+'app-lime': '{{ session.theme_color|default("#D4F67B") }}',
+'app-accent': '{{ session.theme_color|default("#D4F67B") }}',
+'app-purple': '#E2D5FC',
+'app-yellow': '#FFF4CA',
+'app-pink': '#FFDBDE',
+'app-blue': '#D9E8FE'
+},
+borderRadius: {
+'4xl': '2rem',
+'5xl': '2.5rem',
+'6xl': '3rem'
+}
+}
+}
+}
+		</script>
+		<!-- HTMX -->
+		<script src="https://unpkg.com/htmx.org@1.9.11"></script>
+		<style>:root
+		{
+			--app-accent: {{session.theme_color|default("#D4F67B")}}
+			;
+		}
+		body {
+			background-color: #F8F5F2;
+			color: #0F1113;
+		}
+		.dark body {
+			background-color: #0F1113;
+			color: #F8F5F2;
+		}
 
-        @media (min-width: 640px) {
-            body { background-color: #EAE6E1; }
-            .dark body { background-color: #090A0B; }
-            #app-container { background-color: #F8F5F2; }
-            .dark #app-container { background-color: #1A1D1F; }
-        }
-        
-        .custom-checkbox {
-            appearance: none;
-            width: 1.5rem;
-            height: 1.5rem;
-            border: 2px solid #E2E8F0;
-            border-radius: 50%;
-            display: inline-block;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s;
-            background-color: white;
-            flex-shrink: 0;
-            outline: none;
-        }
-        .custom-checkbox:focus {
-            outline: 3px solid var(--app-accent);
-            outline-offset: 2px;
-            box-shadow: 0 0 0 4px rgba(0,0,0,0.1);
-        }
-        .dark .custom-checkbox {
-            background-color: #2D3135;
-            border-color: #3F444D;
-        }
-        .custom-checkbox:checked {
-            background-color: var(--app-accent);
-            border-color: var(--app-accent);
-        }
-        .custom-checkbox:checked::after {
-            content: '';
-            position: absolute;
-            left: 7px;
-            top: 4px;
-            width: 5px;
-            height: 10px;
-            border: solid #0F1113;
-            border-width: 0 2.5px 2.5px 0;
-            transform: rotate(45deg);
-        }
-        .material-input {
-            width: 100%;
-            border: none;
-            border-bottom: 2px solid #E2E8F0;
-            background-color: transparent;
-            padding: 12px 0;
-            font-size: 1.125rem;
-            font-weight: 600;
-            outline: none;
-            transition: all 0.2s;
-            color: #0F1113;
-        }
-        .dark .material-input {
-            border-bottom-color: #3F444D;
-            color: white;
-        }
-        .material-input::placeholder { color: #A0AEC0; font-weight: 500; }
-        .material-input:focus { border-bottom-color: var(--app-accent); }
-        
-        .main-btn {
-            background-color: #0F1113;
-            color: white;
-            border-radius: 9999px;
-            padding: 1rem 2rem;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            transition: transform 0.1s;
-            box-shadow: 0 4px 14px rgba(0,0,0,0.1);
-            width: 100%;
-        }
-        .dark .main-btn {
-            background-color: var(--app-accent);
-            color: #0F1113;
-        }
-        .main-btn:active { transform: scale(0.96); }
-        
-        /* Hide scrollbar */
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+		#app-container {
+			background-color: #F8F5F2;
+		}
+		.dark #app-container {
+			background-color: #1A1D1F;
+		}
 
-        .pill-tag {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 0.025em;
-        }
-    </style>
+		@media(min-width: 640px) {
+			body {
+				background-color: #EAE6E1;
+			}
+			.dark body {
+				background-color: #090A0B;
+			}
+			#app-container {
+				background-color: #F8F5F2;
+			}
+			.dark #app-container {
+				background-color: #1A1D1F;
+			}
+		}
+
+		.custom-checkbox {
+			appearance: none;
+			width: 1.5rem;
+			height: 1.5rem;
+			border: 2px solid #E2E8F0;
+			border-radius: 50%;
+			display: inline-block;
+			position: relative;
+			cursor: pointer;
+			transition: all 0.2s;
+			background-color: white;
+			flex-shrink: 0;
+			outline: none;
+		}
+		.custom-checkbox:focus {
+			outline: 3px solid var(--app-accent);
+			outline-offset: 2px;
+			box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.1);
+		}
+		.dark .custom-checkbox {
+			background-color: #2D3135;
+			border-color: #3F444D;
+		}
+		.custom-checkbox:checked {
+			background-color: var(--app-accent);
+			border-color: var(--app-accent);
+		}
+		.custom-checkbox:checked::after {
+			content: '';
+			position: absolute;
+			left: 7px;
+			top: 4px;
+			width: 5px;
+			height: 10px;
+			border: solid #0F1113;
+			border-width: 0 2.5px 2.5px 0;
+			transform: rotate(45deg);
+		}
+		.material-input {
+			width: 100%;
+			border: none;
+			border-bottom: 2px solid #E2E8F0;
+			background-color: transparent;
+			padding: 12px 0;
+			font-size: 1.125rem;
+			font-weight: 600;
+			outline: none;
+			transition: all 0.2s;
+			color: #0F1113;
+		}
+		.dark .material-input {
+			border-bottom-color: #3F444D;
+			color: white;
+		}
+		.material-input::placeholder {
+			color: #A0AEC0;
+			font-weight: 500;
+		}
+		.material-input:focus {
+			border-bottom-color: var(--app-accent);
+		}
+
+		.main-btn {
+			background-color: #0F1113;
+			color: white;
+			border-radius: 9999px;
+			padding: 1rem 2rem;
+			font-weight: 700;
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			gap: 0.5rem;
+			transition: transform 0.1s;
+			box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+			width: 100%;
+		}
+		.dark .main-btn {
+			background-color: var(--app-accent);
+			color: #0F1113;
+		}
+		.main-btn:active {
+			transform: scale(0.96);
+		}
+
+		/* Hide scrollbar */
+		.hide-scrollbar::-webkit-scrollbar {
+			display: none;
+		}
+		.hide-scrollbar {
+			-ms-overflow-style: none;
+			scrollbar-width: none;
+		}
+
+		.pill-tag {
+			display: inline-flex;
+			align-items: center;
+			padding: 0.25rem 0.75rem;
+			border-radius: 9999px;
+			font-size: 0.75rem;
+			font-weight: 700;
+			letter-spacing: 0.025em;
+		}
+
+		/* Przyspiesza animację przenikania dla bardziej "mobilnego" odczucia */
+		::view-transition-old(root),
+		::view-transition-new(root) {
+			animation-duration: 0.2s;
+		}
+
+		/* Dzięki nadaniu nazw te wybrane elementy nie znikają całkowicie, tylko zostają/płynnie wędrują */
+		#main-header {
+			view-transition-name: main-header;
+		}
+		#bottom-nav {
+			view-transition-name: bottom-nav;
+		}
+
+		/* Animacja 'wjazdu' do wykorzystania na głownych blokach */
+		@keyframes slideUpFade {
+			from { opacity: 0; transform: translateY(16px); }
+			to { opacity: 1; transform: translateY(0); }
+		}
+		.animate-slide-up {
+			animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+		}
+
+		/* Globalne, miękkie efekty po najechaniu na kafelki/przyciski */
+		.hover-lift {
+			transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+		}
+		.hover-lift:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 24px rgba(0,0,0,0.08); /* Lekki cień w trybie jasnym */
+		}
+		.dark .hover-lift:hover {
+			box-shadow: 0 8px 24px rgba(0,0,0,0.4); /* Wyraźniejszy w ciemnym */
+		}
+		.active-scale:active {
+			transform: scale(0.96);
+		}
+	</style>
 </head>
-<body class="text-app-black antialiased min-h-screen relative font-sans sm:flex sm:justify-center">
-    
-    <div id="app-container" class="w-full max-w-md min-h-screen relative pb-28 shadow-2xl sm:rounded-3xl sm:my-4 sm:overflow-hidden bg-[#F8F5F2] dark:bg-[#1A1D1F]">
-        
-        <!-- Top Bar (Minimalist) -->
-        {% if active_tab != 'dashboard' and active_tab != 'login' and active_tab != 'register' %}
-        <header id="main-header" class="sticky top-0 z-20 bg-[#F8F5F2]/90 dark:bg-[#1A1D1F]/90 backdrop-blur-md px-6 pt-6 pb-4 border-b border-transparent">
-            <div class="flex items-center justify-between mb-1">
-                <div class="flex items-center gap-4">
-                    {% if is_detail_view %}
-                        <a href="/{% if active_tab == 'settings' or active_tab == 'admin' %}dashboard{% else %}{{ active_tab }}{% endif %}" class="w-10 h-10 bg-white dark:bg-white/10 rounded-full shadow-sm flex items-center justify-center text-app-black dark:text-white hover:-translate-x-1 transition-transform">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
-                        </a>
-                        <h1 class="text-xl font-bold tracking-tight dark:text-white">{% block header_title %}{{ __('back') }}{% endblock %}</h1>
-                    {% else %}
-                        <h1 class="text-[32px] font-black tracking-tighter text-app-black dark:text-white leading-none">{% block main_title %}{% endblock %}</h1>
-                    {% endif %}
-                </div>
-                
-                {% if session.user_id %}
-                <div class="flex items-center gap-3">
-                    <a href="/settings" class="w-10 h-10 bg-white/20 dark:bg-white/10 rounded-full flex items-center justify-center border border-white/10 shadow-inner overflow-hidden hover:bg-white/30 transition-all">
-                        {% if session.avatar and session.avatar|length > 2 %}
-                            <div class="w-full h-full bg-cover bg-center" style="background-image: url('/uploads/{{ session.avatar }}')"></div>
-                        {% else %}
-                            <span class="text-base text-white font-bold">{{ session.avatar|default(session.username|first|upper) }}</span>
-                        {% endif %}
-                    </a>
-                </div>
-                {% endif %}
-            </div>
-            
-            {% if not is_detail_view %}
-                <p class="text-[13px] text-gray-500 dark:text-gray-400 font-medium opacity-80">{% block main_subtitle %}{% endblock %}</p>
-            {% endif %}
-        </header>
-        {% endif %}
+<body hx-boost="true" class="text-app-black antialiased min-h-screen relative font-sans sm:flex sm:justify-center">
 
-        <main id="main-content" class="{% if active_tab != 'dashboard' and active_tab != 'login' and active_tab != 'register' %}px-6 pt-4{% endif %} relative z-10 w-full h-full">
-            {% block content %}{% endblock %}
-        </main>
+	<div
+		id="app-container" class="w-full max-w-md min-h-screen relative pb-28 shadow-2xl sm:rounded-3xl sm:my-4 sm:overflow-hidden bg-[#F8F5F2] dark:bg-[#1A1D1F]">
 
-        {% if session.user_id %}
-        <!-- Floating Bottom Navigation (Like in the screenshot) -->
-        <div id="bottom-nav" class="fixed bottom-6 w-full max-w-md left-1/2 -translate-x-1/2 px-6 z-50 pointer-events-none transition-all duration-300">
-            <nav class="bg-white/95 dark:bg-[#1A1D1F]/95 backdrop-blur-md border border-gray-100 dark:border-white/10 rounded-[30px] shadow-[0_15px_40px_rgba(0,0,0,0.12)] pointer-events-auto flex items-center justify-between p-2.5">
-                
-                <a href="/dashboard" class="relative group flex-1 flex justify-center items-center h-12 rounded-full transition-all {% if active_tab == 'dashboard' %}bg-app-black text-white shadow-md{% else %}text-gray-400 hover:text-app-black{% endif %}">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                </a>
-                
-                <a href="/shopping" class="relative group flex-1 flex justify-center items-center h-12 rounded-full transition-all {% if active_tab == 'shopping' %}bg-app-black text-white shadow-md{% else %}text-gray-400 hover:text-app-black{% endif %}">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-                </a>
-                
-                <a href="/recipes" class="relative group flex-1 flex justify-center items-center h-12 rounded-full transition-all {% if active_tab == 'recipes' %}bg-app-black text-white shadow-md{% else %}text-gray-400 hover:text-app-black{% endif %}">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                </a>
-                
-                <a href="/tasks" class="relative group flex-1 flex justify-center items-center h-12 rounded-full transition-all {% if active_tab == 'tasks' %}bg-app-black text-white shadow-md{% else %}text-gray-400 hover:text-app-black{% endif %}">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </a>
-                
-                {% if session.is_admin %}
-                <a href="/admin" class="relative group flex-1 flex justify-center items-center h-12 rounded-full transition-all {% if active_tab == 'admin' %}bg-app-black text-white shadow-md{% else %}text-gray-400 hover:text-app-black{% endif %}">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                </a>
-                {% endif %}
-            </nav>
-        </div>
-        {% endif %}
-        
-    </div>
-</body>
-</html>
+		<!-- Top Bar (Minimalist) -->
+		{% if active_tab != 'dashboard' and active_tab != 'login' and active_tab != 'register' %}
+			<header id="main-header" class="sticky top-0 z-20 bg-[#F8F5F2]/90 dark:bg-[#1A1D1F]/90 backdrop-blur-md px-6 pt-6 pb-4 border-b border-transparent">
+				<div class="flex items-center justify-between mb-1">
+					<div class="flex items-center gap-4">
+						{% if is_detail_view %}
+							<a href="/{% if active_tab == 'settings' or active_tab == 'admin' %}dashboard{% else %}{{ active_tab }}{% endif %}" class="w-10 h-10 bg-white dark:bg-white/10 rounded-full shadow-sm flex items-center justify-center text-app-black dark:text-white hover:-translate-x-1 transition-transform">
+								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2.5">
+									<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path>
+								</svg>
+							</a>
+							<h1 class="text-xl font-bold tracking-tight dark:text-white">
+								{% block header_title %}
+									{{ __('back') }}
+								{% endblock %}
+							</h1>
+						{% else %}
+							<h1 class="text-[32px] font-black tracking-tighter text-app-black dark:text-white leading-none"> {% block main_title %}{% endblock %}
+								</h1>
+							{% endif %}
+						</div>
+
+						{% if session.user_id %}
+							<div class="flex items-center gap-3">
+								<a href="/settings" class="w-10 h-10 bg-white/20 dark:bg-white/10 rounded-full flex items-center justify-center border border-white/10 shadow-inner overflow-hidden hover:bg-white/30 transition-all">
+									{% if session.avatar and session.avatar|length > 2 %}
+										<div class="w-full h-full bg-cover bg-center" style="background-image: url('/uploads/{{ session.avatar }}')"></div>
+									{% else %}
+										<span class="text-base text-white font-bold">{{ session.avatar|default(session.username|first|upper) }}</span>
+									{% endif %}
+								</a>
+							</div>
+						{% endif %}
+					</div>
+
+					{% if not is_detail_view %}
+						<p class="text-[13px] text-gray-500 dark:text-gray-400 font-medium opacity-80"> {% block main_subtitle %}{% endblock %}
+							</p>
+						{% endif %}
+					</header>
+				{% endif %}
+
+				<main id="main-content" class="animate-slide-up {% if active_tab != 'dashboard' and active_tab != 'login' and active_tab != 'register' %}px-6 pt-4{% endif %} relative z-10 w-full h-full"> {% block content %}{% endblock %}
+					</main>
+
+					{% if session.user_id %}
+						<!-- Floating Bottom Navigation (Like in the screenshot) -->
+						<div id="bottom-nav" class="fixed bottom-6 w-full max-w-md left-1/2 -translate-x-1/2 px-6 z-50 pointer-events-none transition-all duration-300">
+							<nav class="bg-white/95 dark:bg-[#1A1D1F]/95 backdrop-blur-md border border-gray-100 dark:border-white/10 rounded-[30px] shadow-[0_15px_40px_rgba(0,0,0,0.12)] pointer-events-auto flex items-center justify-between p-2.5">
+
+								<a href="/dashboard" class="relative group flex-1 flex flex-col items-center justify-center p-2 transition-colors hover-lift active-scale {% if active_tab == 'dashboard' %}text-blue-600 dark:text-blue-400{% else %}text-slate-400 hover:text-blue-600 dark:hover:text-blue-400{% endif %}">
+									<svg class="w-5 h-5 mb-1.5" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2.5">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+									</svg>
+									<span class="text-[10px] font-medium leading-none">Pulpit</span>
+								</a>
+
+								<a href="/shopping" class="relative group flex-1 flex flex-col items-center justify-center p-2 transition-colors hover-lift active-scale {% if active_tab == 'shopping' %}text-blue-600 dark:text-blue-400{% else %}text-slate-400 hover:text-blue-600 dark:hover:text-blue-400{% endif %}">
+									<svg class="w-5 h-5 mb-1.5" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2.5">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+									</svg>
+									<span class="text-[10px] font-medium leading-none">Zakupy</span>
+								</a>
+
+								<a href="/recipes" class="relative group flex-1 flex flex-col items-center justify-center p-2 transition-colors hover-lift active-scale {% if active_tab == 'recipes' %}text-blue-600 dark:text-blue-400{% else %}text-slate-400 hover:text-blue-600 dark:hover:text-blue-400{% endif %}">
+									<svg class="w-5 h-5 mb-1.5" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2.5">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+									</svg>
+									<span class="text-[10px] font-medium leading-none">Przepisy</span>
+								</a>
+
+								<a href="/tasks" class="relative group flex-1 flex flex-col items-center justify-center p-2 transition-colors hover-lift active-scale {% if active_tab == 'tasks' %}text-blue-600 dark:text-blue-400{% else %}text-slate-400 hover:text-blue-600 dark:hover:text-blue-400{% endif %}">
+									<svg class="w-5 h-5 mb-1.5" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2.5">
+										<path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+									</svg>
+									<span class="text-[10px] font-medium leading-none">Zadania</span>
+								</a>
+
+								{% if session.is_admin %}
+									<a href="/admin" class="relative group flex-1 flex flex-col items-center justify-center p-2 transition-colors hover-lift active-scale {% if active_tab == 'admin' %}text-blue-600 dark:text-blue-400{% else %}text-slate-400 hover:text-blue-600 dark:hover:text-blue-400{% endif %}">
+										<svg class="w-5 h-5 mb-1.5" fill="none" stroke="currentColor" viewbox="0 0 24 24" stroke-width="2.5">
+											<path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+											<path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+										</svg>
+										<span class="text-[10px] font-medium leading-none">Admin</span>
+									</a>
+								{% endif %}
+							</nav>
+						</div>
+					{% endif %}
+
+				</div>
+			</body>
+		</html>

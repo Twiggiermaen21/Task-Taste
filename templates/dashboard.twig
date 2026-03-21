@@ -29,7 +29,7 @@
 
 <!-- White overlapping card -> "Instant Floats" equivalent -->
 <div class="px-6 -mt-12 relative z-10 font-sans">
-    <div class="bg-white dark:bg-[#1A1D1F] rounded-[28px] p-5 shadow-[0_15px_30px_rgba(0,0,0,0.08)] flex items-center justify-between mb-8 cursor-pointer active:scale-95 transition-transform border border-transparent dark:border-white/5" onclick="window.location.href='/shopping'">
+    <div class="bg-white dark:bg-[#1A1D1F] rounded-[28px] p-5 shadow-[0_15px_30px_rgba(0,0,0,0.08)] flex items-center justify-between mb-8 cursor-pointer hover-lift active-scale transition-transform border border-transparent dark:border-white/5" onclick="window.location.href='/shopping'">
         <div class="flex items-center gap-4">
             <div class="w-12 h-12 bg-app-black dark:bg-app-accent rounded-full flex items-center justify-center shrink-0">
                 <svg class="w-5 h-5 text-white dark:text-app-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
@@ -48,7 +48,7 @@
     <h3 class="text-[17px] font-extrabold mb-3 ml-2 tracking-tight dark:text-white">{{ __('catalog') }}</h3>
     <div class="grid grid-cols-2 gap-4 mb-8">
         <!-- Shopping block (Accent) -->
-        <a href="/shopping" class="rounded-[32px] p-5 aspect-square relative overflow-hidden flex flex-col justify-between hover:scale-[1.03] transition-transform active:scale-95 shadow-sm" style="background-color: var(--app-accent)">
+        <a href="/shopping" class="rounded-[32px] p-5 aspect-square relative overflow-hidden flex flex-col justify-between hover-lift active-scale transition-transform shadow-sm" style="background-color: var(--app-accent)">
             <div class="w-24 h-24 border-[6px] border-black/5 rounded-full border-t-transparent border-r-transparent absolute -top-8 -right-8"></div>
             
             <div class="mb-2 w-12 h-12 rounded-full border-2 border-app-black/90 flex items-center justify-center">
@@ -62,7 +62,7 @@
         </a>
 
         <!-- Recipes block (Purple) -->
-        <a href="/recipes" class="bg-app-purple rounded-[32px] p-5 aspect-square relative overflow-hidden flex flex-col justify-between hover:scale-[1.03] transition-transform active:scale-95 shadow-sm">
+        <a href="/recipes" class="bg-app-purple rounded-[32px] p-5 aspect-square relative overflow-hidden flex flex-col justify-between hover-lift active-scale transition-transform shadow-sm">
             <div class="w-32 h-32 border-[8px] border-black/5 rounded-full border-b-transparent border-l-transparent absolute -bottom-12 -right-12"></div>
             
             <div class="mb-2 w-12 h-12 rounded-full border-2 border-app-black/30 dark:border-white/20 flex items-center justify-center relative">
@@ -84,7 +84,7 @@
     
     <div class="flex flex-col gap-3">
         {% for task in dashboard.urgent_tasks %}
-            <a href="/tasks/{{ task.group_id }}" class="bg-white dark:bg-[#1A1D1F] rounded-3xl p-4 flex items-center gap-4 shadow-sm border border-gray-100/50 dark:border-white/5 hover:shadow-md transition-shadow">
+            <a href="/tasks/{{ task.group_id }}" class="bg-white dark:bg-[#1A1D1F] rounded-3xl p-4 flex items-center gap-4 shadow-sm border border-gray-100/50 dark:border-white/5 hover-lift active-scale transition-shadow">
                 
                 <!-- Category colored icon -->
                 <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0" style="background-color: {{ task.color|default('#F0F0F0') }}40;">
