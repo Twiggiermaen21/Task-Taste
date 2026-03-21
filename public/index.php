@@ -35,17 +35,9 @@ if (!is_dir($uploadsDir . '/avatars'))
     mkdir($uploadsDir . '/avatars', 0777, true);
 
 // Database connection
-$dbPath = $dataDir . '/database.sqlite';
-$pdo = new PDO('sqlite:' . $dbPath);
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-// Database Schema Execution
-$schema = file_get_contents(__DIR__ . '/../data/schema.sql');
-if ($schema) {
-    $pdo->exec($schema);
-}
-// Ensure foreign keys
-$pdo->exec("PRAGMA foreign_keys = ON;");
+$mongoUri = "mongodb://9582504a52a064f3:555fc12eafc9825c01daf70de1ca7260@mongo-0.task-taste-db--d6k8d9fr6tfs.addon.code.run:27017/62927e60bef8?replicaSet=rs0&authSource=62927e60bef8&tls=true";
+$mongoClient = new MongoDB\Client($mongoUri);
+$db = $mongoClient->selectDatabase('62927e60bef8');
 
 // Slim App
 $app = AppFactory::create();
@@ -84,24 +76,24 @@ $app->get('/', function (Request $request, Response $response) {
 });
 
 // Moduły Zewnętrzne i Autoryzacyjne
-(require __DIR__ . '/../src/Routes/AuthRoutes.php')($app, $pdo);
-(require __DIR__ . '/../src/Routes/AdminRoutes.php')($app, $adminMiddleware, $pdo);
+(require __DIR__ . '/../src/Routes/AuthRoutes.php')($app, $db);
+(require __DIR__ . '/../src/Routes/AdminRoutes.php')($app, $adminMiddleware, $db);
 
 // Moduły Chronione (Aplikacja Głównego Asystenta)
-$app->group('', function (\Slim\Routing\RouteCollectorProxy $group) use ($pdo) {
+$app->group('', function (\Slim\Routing\RouteCollectorProxy $group) use ($db) {
 
-    $group->get('/dashboard', function (Request $request, Response $response) use ($pdo) {
+    $group->get('/dashboard', function (Request $request, Response $response) use ($db) {
         return Twig::fromRequest($request)->render($response, 'dashboard.twig', [
-            'dashboard' => getDashboardData($pdo, $_SESSION['user_id']),
+            'dashboard' => getDashboardData($db, $_SESSION['user_id']),
             'active_tab' => 'dashboard'
         ]);
     });
 
     // Moduły domenowe wciągnięte z /src/Routes
-    (require __DIR__ . '/../src/Routes/ShoppingRoutes.php')($group, $pdo);
-    (require __DIR__ . '/../src/Routes/RecipeRoutes.php')($group, $pdo);
-    (require __DIR__ . '/../src/Routes/TaskRoutes.php')($group, $pdo);
-    (require __DIR__ . '/../src/Routes/SettingsRoutes.php')($group, $pdo);
+    (require __DIR__ . '/../src/Routes/ShoppingRoutes.php')($group, $db);
+    (require __DIR__ . '/../src/Routes/RecipeRoutes.php')($group, $db);
+    (require __DIR__ . '/../src/Routes/TaskRoutes.php')($group, $db);
+    (require __DIR__ . '/../src/Routes/SettingsRoutes.php')($group, $db);
 
 })->add($authMiddleware);
 

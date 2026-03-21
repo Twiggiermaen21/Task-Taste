@@ -3,32 +3,35 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
 
-return function ($app, PDO $pdo) {
+return function ($app, \MongoDB\Database $db) {
     $app->get('/login', function (Request $request, Response $response) {
         if (isset($_SESSION['user_id']))
             return $response->withHeader('Location', '/dashboard')->withStatus(302);
         return Twig::fromRequest($request)->render($response, 'auth/login.twig', ['active_tab' => 'login']);
     });
 
-    $app->post('/login', function (Request $request, Response $response) use ($pdo) {
+    $app->post('/login', function (Request $request, Response $response) use ($db) {
         $data = $request->getParsedBody();
         $email = trim($data['email'] ?? '');
         $password = $data['password'] ?? '';
 
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? OR username = ?");
-        $stmt->execute([$email, $email]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        $user = $db->users->findOne([
+            '$or' => [
+                ['email' => $email],
+                ['username' => $email]
+            ]
+        ]);
 
         if ($user && password_verify($password, $user['password_hash'])) {
-            if ($user['is_active'] == 0) {
+            if (($user['is_active'] ?? 1) == 0) {
                 return Twig::fromRequest($request)->render($response, 'auth/login.twig', ['error' => 'Konto zostało zablokowane przez administratora.']);
             }
-            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['user_id'] = (string) $user['_id'];
             $_SESSION['username'] = $user['username'];
-            $_SESSION['is_admin'] = (bool) $user['is_admin'];
-            $_SESSION['theme_color'] = $user['theme_color'];
-            $_SESSION['language'] = $user['language'];
-            $_SESSION['avatar'] = $user['avatar'];
+            $_SESSION['is_admin'] = (bool) ($user['is_admin'] ?? false);
+            $_SESSION['theme_color'] = $user['theme_color'] ?? '#D4F67B';
+            $_SESSION['language'] = $user['language'] ?? 'pl';
+            $_SESSION['avatar'] = $user['avatar'] ?? '👤';
             $_SESSION['theme_mode'] = $user['theme_mode'] ?? 'light';
             return $response->withHeader('Location', '/dashboard')->withStatus(302);
         }
@@ -41,26 +44,45 @@ return function ($app, PDO $pdo) {
         return Twig::fromRequest($request)->render($response, 'auth/register.twig', ['active_tab' => 'register']);
     });
 
-    $app->post('/register', function (Request $request, Response $response) use ($pdo) {
+    $app->post('/register', function (Request $request, Response $response) use ($db) {
         $data = $request->getParsedBody();
         $username = trim($data['username'] ?? '');
         $email = trim($data['email'] ?? '');
         $password = $data['password'] ?? '';
 
         if ($username && $email && $password) {
-            $stmt = $pdo->prepare("SELECT COUNT(*) FROM users");
-            $stmt->execute();
-            $isAdmin = ($stmt->fetchColumn() == 0) ? 1 : 0;
+            $adminCount = $db->users->countDocuments([]);
+            $isAdmin = ($adminCount == 0) ? 1 : 0;
             $hash = password_hash($password, PASSWORD_DEFAULT);
             try {
-                $stmt = $pdo->prepare("INSERT INTO users (username, email, password_hash, is_admin) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$username, $email, $hash, $isAdmin]);
-                $_SESSION['user_id'] = $pdo->lastInsertId();
+                $existing = $db->users->findOne([
+                    '$or' => [
+                        ['email' => $email],
+                        ['username' => $username]
+                    ]
+                ]);
+                if ($existing) {
+                    return Twig::fromRequest($request)->render($response, 'auth/register.twig', ['error' => 'Ten E-mail lub Nazwa użytkownika jest już zajęta.']);
+                }
+
+                $insertOneResult = $db->users->insertOne([
+                    'username' => $username,
+                    'email' => $email,
+                    'password_hash' => $hash,
+                    'is_admin' => $isAdmin,
+                    'is_active' => 1,
+                    'theme_color' => '#D4F67B',
+                    'language' => 'pl',
+                    'avatar' => '👤',
+                    'theme_mode' => 'light'
+                ]);
+
+                $_SESSION['user_id'] = (string) $insertOneResult->getInsertedId();
                 $_SESSION['username'] = $username;
                 $_SESSION['is_admin'] = $isAdmin;
                 return $response->withHeader('Location', '/dashboard')->withStatus(302);
-            } catch (PDOException $e) {
-                return Twig::fromRequest($request)->render($response, 'auth/register.twig', ['error' => 'Ten E-mail lub Nazwa użytkownika jest już zajęta.']);
+            } catch (\Exception $e) {
+                return Twig::fromRequest($request)->render($response, 'auth/register.twig', ['error' => 'Wystąpił błąd podczas rejestracji.']);
             }
         }
         return Twig::fromRequest($request)->render($response, 'auth/register.twig', ['error' => 'Wypełnij wszystkie pola.']);

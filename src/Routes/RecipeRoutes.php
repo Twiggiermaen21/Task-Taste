@@ -3,7 +3,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
 
-return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
+return function (\Slim\Routing\RouteCollectorProxy $group, \MongoDB\Database $db) {
     $category_emojis = [
         'Śniadanie' => '🍳',
         'Obiad' => '🍝',
@@ -12,46 +12,50 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         'Inne' => '🍴'
     ];
 
-    $group->get('/recipes', function (Request $request, Response $response) use ($pdo, $category_emojis) {
+    $group->get('/recipes', function (Request $request, Response $response) use ($db, $category_emojis) {
         return Twig::fromRequest($request)->render($response, 'recipes.twig', [
-            'grouped_recipes' => getRecipes($pdo, $_SESSION['user_id']),
+            'grouped_recipes' => getRecipes($db, $_SESSION['user_id']),
             'category_emojis' => $category_emojis,
             'active_tab' => 'recipes'
         ]);
     });
 
-    $group->post('/recipes', function (Request $request, Response $response) use ($pdo, $category_emojis) {
+    $group->post('/recipes', function (Request $request, Response $response) use ($db, $category_emojis) {
         $data = $request->getParsedBody();
         $title = trim($data['title'] ?? '');
         $instructions = trim($data['instructions'] ?? '');
         $category = trim($data['category'] ?? 'Inne');
         if ($title !== '') {
-            $stmt = $pdo->prepare("INSERT INTO recipes (title, instructions, category, user_id) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$title, $instructions, $category, $_SESSION['user_id']]);
+            $db->recipes->insertOne([
+                'title' => $title,
+                'instructions' => $instructions,
+                'category' => $category,
+                'user_id' => $_SESSION['user_id'],
+                'ingredients' => []
+            ]);
         }
         return Twig::fromRequest($request)->render($response, 'partials/recipes_content.twig', [
-            'grouped_recipes' => getRecipes($pdo, $_SESSION['user_id']),
+            'grouped_recipes' => getRecipes($db, $_SESSION['user_id']),
             'category_emojis' => $category_emojis
         ]);
     });
 
-    $group->delete('/recipes/{id}', function (Request $request, Response $response, $args) use ($pdo) {
-        $id = (int) $args['id'];
-        $stmt = $pdo->prepare("SELECT image FROM recipes WHERE id = ? AND user_id = ?");
-        $stmt->execute([$id, $_SESSION['user_id']]);
-        if ($recipe = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $pdo->prepare("DELETE FROM recipes WHERE id = ?")->execute([$id]);
+    $group->delete('/recipes/{id}', function (Request $request, Response $response, $args) use ($db) {
+        $id = $args['id'];
+        $recipe = $db->recipes->findOne(['_id' => new \MongoDB\BSON\ObjectId($id), 'user_id' => $_SESSION['user_id']]);
+        if ($recipe) {
+            $db->recipes->deleteOne(['_id' => new \MongoDB\BSON\ObjectId($id)]);
         }
         return $response->withHeader('HX-Redirect', '/recipes')->withStatus(302);
     });
 
-    $group->get('/recipes/{id}/edit', function (Request $request, Response $response, $args) use ($pdo) {
-        $id = (int) $args['id'];
-        $stmt = $pdo->prepare("SELECT * FROM recipes WHERE id = ? AND user_id = ?");
-        $stmt->execute([$id, $_SESSION['user_id']]);
-        $recipe = $stmt->fetch(PDO::FETCH_ASSOC);
+    $group->get('/recipes/{id}/edit', function (Request $request, Response $response, $args) use ($db) {
+        $id = $args['id'];
+        $recipe = $db->recipes->findOne(['_id' => new \MongoDB\BSON\ObjectId($id), 'user_id' => $_SESSION['user_id']]);
         if (!$recipe)
             return $response->withHeader('Location', '/recipes')->withStatus(302);
+
+        $recipe['id'] = (string)$recipe['_id'];
 
         return Twig::fromRequest($request)->render($response, 'recipe_edit.twig', [
             'recipe' => $recipe,
@@ -60,32 +64,35 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         ]);
     });
 
-    $group->post('/recipes/{id}/edit', function (Request $request, Response $response, $args) use ($pdo) {
-        $id = (int) $args['id'];
-        $stmt = $pdo->prepare("SELECT image FROM recipes WHERE id = ? AND user_id = ?");
-        $stmt->execute([$id, $_SESSION['user_id']]);
-        if ($recipe = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $group->post('/recipes/{id}/edit', function (Request $request, Response $response, $args) use ($db) {
+        $id = $args['id'];
+        $recipe = $db->recipes->findOne(['_id' => new \MongoDB\BSON\ObjectId($id), 'user_id' => $_SESSION['user_id']]);
+        if ($recipe) {
             $data = $request->getParsedBody();
             $title = trim($data['title'] ?? '');
             $instructions = trim($data['instructions'] ?? '');
             $category = trim($data['category'] ?? 'Inne');
 
-            $pdo->prepare("UPDATE recipes SET title = ?, instructions = ?, category = ? WHERE id = ?")->execute([$title, $instructions, $category, $id]);
+            $db->recipes->updateOne(
+                ['_id' => new \MongoDB\BSON\ObjectId($id)],
+                ['$set' => [
+                    'title' => $title,
+                    'instructions' => $instructions,
+                    'category' => $category
+                ]]
+            );
         }
         return $response->withHeader('Location', '/recipes/' . $id)->withStatus(302);
     });
 
-    $group->get('/recipes/{id}', function (Request $request, Response $response, $args) use ($pdo) {
-        $id = (int) $args['id'];
-        $stmt = $pdo->prepare("SELECT * FROM recipes WHERE id = ? AND user_id = ?");
-        $stmt->execute([$id, $_SESSION['user_id']]);
-        $recipe = $stmt->fetch(PDO::FETCH_ASSOC);
+    $group->get('/recipes/{id}', function (Request $request, Response $response, $args) use ($db) {
+        $id = $args['id'];
+        $recipe = $db->recipes->findOne(['_id' => new \MongoDB\BSON\ObjectId($id), 'user_id' => $_SESSION['user_id']]);
         if (!$recipe)
             return $response->withHeader('Location', '/recipes')->withStatus(302);
 
-        $stmt2 = $pdo->prepare("SELECT * FROM recipe_ingredients WHERE recipe_id = ? ORDER BY id ASC");
-        $stmt2->execute([$id]);
-        $ingredients = $stmt2->fetchAll(PDO::FETCH_ASSOC);
+        $recipe['id'] = (string)$recipe['_id'];
+        $ingredients = $recipe['ingredients'] ?? [];
 
         if ($request->hasHeader('HX-Request')) {
             return Twig::fromRequest($request)->render($response, 'partials/recipe_detail.twig', [
@@ -102,17 +109,25 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         ]);
     });
 
-    $group->post('/recipes/{recipe_id}/ingredient', function (Request $request, Response $response, $args) use ($pdo) {
-        $id = (int) $args['recipe_id'];
-        $check = $pdo->prepare("SELECT id FROM recipes WHERE id = ? AND user_id = ?");
-        $check->execute([$id, $_SESSION['user_id']]);
-        if ($check->fetch()) {
+    $group->post('/recipes/{recipe_id}/ingredient', function (Request $request, Response $response, $args) use ($db) {
+        $id = $args['recipe_id'];
+        $check = $db->recipes->findOne(['_id' => new \MongoDB\BSON\ObjectId($id), 'user_id' => $_SESSION['user_id']]);
+        if ($check) {
             $name = trim($request->getParsedBody()['name'] ?? '');
-            if ($name !== '')
-                $pdo->prepare("INSERT INTO recipe_ingredients (recipe_id, name) VALUES (?, ?)")->execute([$id, $name]);
+            if ($name !== '') {
+                $db->recipes->updateOne(
+                    ['_id' => new \MongoDB\BSON\ObjectId($id)],
+                    ['$push' => ['ingredients' => ['id' => uniqid(), 'name' => $name, 'recipe_id' => $id]]]
+                );
+            }
         }
-        $stmt2 = $pdo->prepare("SELECT * FROM recipe_ingredients WHERE recipe_id = ? ORDER BY id ASC");
-        $stmt2->execute([$id]);
-        return Twig::fromRequest($request)->render($response, 'partials/recipe_ingredients.twig', ['ingredients' => $stmt2->fetchAll(PDO::FETCH_ASSOC), 'recipe' => ['id' => $id]]);
+        
+        $recipe = $db->recipes->findOne(['_id' => new \MongoDB\BSON\ObjectId($id)]);
+        $ingredients = $recipe['ingredients'] ?? [];
+
+        return Twig::fromRequest($request)->render($response, 'partials/recipe_ingredients.twig', [
+            'ingredients' => $ingredients, 
+            'recipe' => ['id' => $id]
+        ]);
     });
 };

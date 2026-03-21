@@ -3,11 +3,9 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
 
-return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
-    $group->get('/settings', function (Request $request, Response $response) use ($pdo) {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
-        $stmt->execute([$_SESSION['user_id']]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+return function (\Slim\Routing\RouteCollectorProxy $group, \MongoDB\Database $db) {
+    $group->get('/settings', function (Request $request, Response $response) use ($db) {
+        $user = $db->users->findOne(['_id' => new \MongoDB\BSON\ObjectId($_SESSION['user_id'])]);
 
         return Twig::fromRequest($request)->render($response, 'settings.twig', [
             'user_pref' => $user,
@@ -16,15 +14,22 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         ]);
     });
 
-    $group->post('/settings/update', function (Request $request, Response $response) use ($pdo) {
+    $group->post('/settings/update', function (Request $request, Response $response) use ($db) {
         $data = $request->getParsedBody();
         $theme = $data['theme_color'] ?? '#D4F67B';
         $lang = $data['language'] ?? 'pl';
         $mode = $data['theme_mode'] ?? 'light';
         $avatarEmoji = $data['avatar'] ?? '👤';
 
-        $stmt = $pdo->prepare("UPDATE users SET theme_color = ?, language = ?, theme_mode = ?, avatar = ? WHERE id = ?");
-        $stmt->execute([$theme, $lang, $mode, $avatarEmoji, $_SESSION['user_id']]);
+        $db->users->updateOne(
+            ['_id' => new \MongoDB\BSON\ObjectId($_SESSION['user_id'])],
+            ['$set' => [
+                'theme_color' => $theme,
+                'language' => $lang,
+                'theme_mode' => $mode,
+                'avatar' => $avatarEmoji
+            ]]
+        );
 
         $_SESSION['theme_color'] = $theme;
         $_SESSION['language'] = $lang;

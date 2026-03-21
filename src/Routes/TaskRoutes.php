@@ -3,56 +3,70 @@ use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Views\Twig;
 
-return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
-    $group->get('/tasks', function (Request $request, Response $response) use ($pdo) {
-        return Twig::fromRequest($request)->render($response, 'tasks.twig', ['groups' => getTaskGroups($pdo, $_SESSION['user_id']), 'active_tab' => 'tasks']);
+return function (\Slim\Routing\RouteCollectorProxy $group, \MongoDB\Database $db) {
+    function getTasksForGroup(\MongoDB\Database $db, string $groupId, string $groupName) {
+        $tasks = [];
+        foreach ($db->tasks->find(['group_id' => $groupId]) as $t) {
+            $t['id'] = (string)$t['_id'];
+            $t['group_name'] = $groupName;
+            $tasks[] = $t;
+        }
+        usort($tasks, function($a, $b) {
+            if (($a['is_completed'] ?? 0) !== ($b['is_completed'] ?? 0)) {
+                return ($a['is_completed'] ?? 0) <=> ($b['is_completed'] ?? 0);
+            }
+            $da = empty($a['due_date']) ? PHP_INT_MAX : strtotime($a['due_date']);
+            $dbate = empty($b['due_date']) ? PHP_INT_MAX : strtotime($b['due_date']);
+            return $da <=> $dbate;
+        });
+        return $tasks;
+    }
+
+    $group->get('/tasks', function (Request $request, Response $response) use ($db) {
+        return Twig::fromRequest($request)->render($response, 'tasks.twig', ['groups' => getTaskGroups($db, $_SESSION['user_id']), 'active_tab' => 'tasks']);
     });
 
-    $group->post('/tasks/group', function (Request $request, Response $response) use ($pdo) {
+    $group->post('/tasks/group', function (Request $request, Response $response) use ($db) {
         $name = trim($request->getParsedBody()['name'] ?? '');
-        if ($name !== '')
-            $pdo->prepare("INSERT INTO task_groups (name, user_id) VALUES (?, ?)")->execute([$name, $_SESSION['user_id']]);
-        return Twig::fromRequest($request)->render($response, 'partials/tasks_content.twig', ['groups' => getTaskGroups($pdo, $_SESSION['user_id'])]);
+        if ($name !== '') {
+            $db->task_groups->insertOne(['name' => $name, 'user_id' => $_SESSION['user_id']]);
+        }
+        return Twig::fromRequest($request)->render($response, 'partials/tasks_content.twig', ['groups' => getTaskGroups($db, $_SESSION['user_id'])]);
     });
 
-    $group->delete('/tasks/group/{id}', function (Request $request, Response $response, $args) use ($pdo) {
-        $id = (int) $args['id'];
-        $pdo->prepare("DELETE FROM task_groups WHERE id = ? AND user_id = ?")->execute([$id, $_SESSION['user_id']]);
+    $group->delete('/tasks/group/{id}', function (Request $request, Response $response, $args) use ($db) {
+        $id = $args['id'];
+        $db->task_groups->deleteOne(['_id' => new \MongoDB\BSON\ObjectId($id), 'user_id' => $_SESSION['user_id']]);
+        $db->tasks->deleteMany(['group_id' => $id]);
         return $response->withHeader('HX-Redirect', '/tasks')->withStatus(302);
     });
 
-    $group->get('/tasks/{id}', function (Request $request, Response $response, $args) use ($pdo) {
-        $id = (int) $args['id'];
-        $stmt = $pdo->prepare("SELECT * FROM task_groups WHERE id = ? AND user_id = ?");
-        $stmt->execute([$id, $_SESSION['user_id']]);
-        $tgroup = $stmt->fetch(PDO::FETCH_ASSOC);
+    $group->get('/tasks/{id}', function (Request $request, Response $response, $args) use ($db) {
+        $id = $args['id'];
+        $tgroup = $db->task_groups->findOne(['_id' => new \MongoDB\BSON\ObjectId($id), 'user_id' => $_SESSION['user_id']]);
         if (!$tgroup)
             return $response->withHeader('Location', '/tasks')->withStatus(302);
 
-        $stmt2 = $pdo->prepare("SELECT t.*, tg.name as group_name FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.group_id = ? ORDER BY t.is_completed ASC, t.due_date ASC");
-        $stmt2->execute([$id]);
-        $tasks = $stmt2->fetchAll(PDO::FETCH_ASSOC);
-
+        $tasks = getTasksForGroup($db, (string)$tgroup['_id'], $tgroup['name']);
+        
         $grouped = [];
-        if (!empty($tasks)) {
-            $grouped[$tasks[0]['group_name']] = $tasks;
-        } else {
-            $grouped[$tgroup['name']] = [];
-        }
+        $grouped[$tgroup['name']] = $tasks;
+
+        $tgroup_arr = (array)$tgroup;
+        $tgroup_arr['id'] = (string)$tgroup['_id'];
 
         return Twig::fromRequest($request)->render($response, 'task_group_view.twig', [
-            'group' => $tgroup,
+            'group' => $tgroup_arr,
             'grouped_tasks' => $grouped,
             'active_tab' => 'tasks',
             'is_detail_view' => true
         ]);
     });
 
-    $group->post('/tasks/{group_id}/task', function (Request $request, Response $response, $args) use ($pdo) {
-        $id = (int) $args['group_id'];
-        $check = $pdo->prepare("SELECT id FROM task_groups WHERE id = ? AND user_id = ?");
-        $check->execute([$id, $_SESSION['user_id']]);
-        if ($check->fetch()) {
+    $group->post('/tasks/{group_id}/task', function (Request $request, Response $response, $args) use ($db) {
+        $id = $args['group_id'];
+        $tgroup = $db->task_groups->findOne(['_id' => new \MongoDB\BSON\ObjectId($id), 'user_id' => $_SESSION['user_id']]);
+        if ($tgroup) {
             $data = $request->getParsedBody();
             $title = trim($data['title'] ?? '');
             $description = trim($data['description'] ?? '');
@@ -60,99 +74,101 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
             $due_date = trim($data['due_date'] ?? '');
 
             if ($title !== '') {
-                $pdo->prepare("INSERT INTO tasks (group_id, title, description, color, due_date) VALUES (?, ?, ?, ?, ?)")->execute([$id, $title, $description, $color, $due_date]);
+                $db->tasks->insertOne([
+                    'group_id' => $id,
+                    'title' => $title,
+                    'description' => $description,
+                    'color' => $color,
+                    'due_date' => $due_date,
+                    'is_completed' => 0,
+                    'created_at' => date('Y-m-d H:i:s')
+                ]);
             }
-        }
-        $stmt2 = $pdo->prepare("SELECT t.*, tg.name as group_name FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.group_id = ? ORDER BY t.is_completed ASC, t.due_date ASC");
-        $stmt2->execute([$id]);
-        $tasks = $stmt2->fetchAll(PDO::FETCH_ASSOC);
-
-        $grouped = [];
-        if (!empty($tasks)) {
-            $grouped[$tasks[0]['group_name']] = $tasks;
-        }
-
-        return Twig::fromRequest($request)->render($response, 'partials/tasks_items.twig', ['grouped_tasks' => $grouped]);
-    });
-
-    $group->delete('/tasks/task/{id}', function (Request $request, Response $response, $args) use ($pdo) {
-        $id = (int) $args['id'];
-        $stmt = $pdo->prepare("SELECT t.image, t.group_id FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.id = ? AND tg.user_id = ?");
-        $stmt->execute([$id, $_SESSION['user_id']]);
-        if ($task = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $pdo->prepare("DELETE FROM tasks WHERE id = ?")->execute([$id]);
-            $g_id = $task['group_id'];
-
-            $stmt3 = $pdo->prepare("SELECT t.*, tg.name as group_name FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.group_id = ? ORDER BY t.is_completed ASC, t.due_date ASC");
-            $stmt3->execute([$g_id]);
-            $tasks = $stmt3->fetchAll(PDO::FETCH_ASSOC);
-
-            $grouped = [];
-            if (!empty($tasks)) {
-                $grouped[$tasks[0]['group_name']] = $tasks;
-            } else {
-                // Fetch group name even if no tasks left
-                $st = $pdo->prepare("SELECT name FROM task_groups WHERE id = ?");
-                $st->execute([$g_id]);
-                $g_name = $st->fetchColumn();
-                $grouped[$g_name] = [];
-            }
-
+            $tasks = getTasksForGroup($db, $id, $tgroup['name']);
+            $grouped = [$tgroup['name'] => $tasks];
             return Twig::fromRequest($request)->render($response, 'partials/tasks_items.twig', ['grouped_tasks' => $grouped]);
         }
         return $response->withStatus(404);
     });
 
-    $group->get('/tasks/task/{id}/edit', function (Request $request, Response $response, $args) use ($pdo) {
-        $id = (int) $args['id'];
-        $stmt = $pdo->prepare("SELECT t.*, tg.id as group_id FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.id = ? AND tg.user_id = ?");
-        $stmt->execute([$id, $_SESSION['user_id']]);
-        $task = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$task)
-            return $response->withHeader('Location', '/tasks')->withStatus(302);
-
-        return Twig::fromRequest($request)->render($response, 'task_edit.twig', [
-            'task' => $task,
-            'active_tab' => 'tasks'
-        ]);
+    $group->delete('/tasks/task/{id}', function (Request $request, Response $response, $args) use ($db) {
+        $id = $args['id'];
+        $task = $db->tasks->findOne(['_id' => new \MongoDB\BSON\ObjectId($id)]);
+        if ($task) {
+            $g_id = $task['group_id'];
+            $tgroup = $db->task_groups->findOne(['_id' => new \MongoDB\BSON\ObjectId($g_id), 'user_id' => $_SESSION['user_id']]);
+            if ($tgroup) {
+                $db->tasks->deleteOne(['_id' => new \MongoDB\BSON\ObjectId($id)]);
+                
+                $tasks = getTasksForGroup($db, $g_id, $tgroup['name']);
+                $grouped = [$tgroup['name'] => $tasks];
+                return Twig::fromRequest($request)->render($response, 'partials/tasks_items.twig', ['grouped_tasks' => $grouped]);
+            }
+        }
+        return $response->withStatus(404);
     });
 
-    $group->post('/tasks/task/{id}/edit', function (Request $request, Response $response, $args) use ($pdo) {
-        $id = (int) $args['id'];
-        $stmt = $pdo->prepare("SELECT t.*, tg.id as group_id FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.id = ? AND tg.user_id = ?");
-        $stmt->execute([$id, $_SESSION['user_id']]);
-        if ($task = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $data = $request->getParsedBody();
-            $title = trim($data['title'] ?? '');
-            $description = trim($data['description'] ?? '');
-            $color = trim($data['color'] ?? '');
-            $due_date = trim($data['due_date'] ?? '');
-
-            $pdo->prepare("UPDATE tasks SET title = ?, description = ?, color = ?, due_date = ? WHERE id = ?")
-                ->execute([$title, $description, $color, $due_date, $id]);
-            return $response->withHeader('Location', '/tasks/' . $task['group_id'])->withStatus(302);
+    $group->get('/tasks/task/{id}/edit', function (Request $request, Response $response, $args) use ($db) {
+        $id = $args['id'];
+        $task = $db->tasks->findOne(['_id' => new \MongoDB\BSON\ObjectId($id)]);
+        if ($task) {
+            $tgroup = $db->task_groups->findOne(['_id' => new \MongoDB\BSON\ObjectId($task['group_id']), 'user_id' => $_SESSION['user_id']]);
+            if ($tgroup) {
+                $task_arr = (array)$task;
+                $task_arr['id'] = (string)$task['_id'];
+                
+                return Twig::fromRequest($request)->render($response, 'task_edit.twig', [
+                    'task' => $task_arr,
+                    'active_tab' => 'tasks'
+                ]);
+            }
         }
         return $response->withHeader('Location', '/tasks')->withStatus(302);
     });
 
-    $group->patch('/tasks/{id}/toggle', function (Request $request, Response $response, $args) use ($pdo) {
-        $id = (int) $args['id'];
-        $stmt = $pdo->prepare("SELECT t.is_completed, t.group_id FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.id = ? AND tg.user_id = ?");
-        $stmt->execute([$id, $_SESSION['user_id']]);
-        if ($task = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $pdo->prepare("UPDATE tasks SET is_completed = ? WHERE id = ?")->execute([$task['is_completed'] ? 0 : 1, $id]);
-            $group_id = $task['group_id'];
+    $group->post('/tasks/task/{id}/edit', function (Request $request, Response $response, $args) use ($db) {
+        $id = $args['id'];
+        $task = $db->tasks->findOne(['_id' => new \MongoDB\BSON\ObjectId($id)]);
+        if ($task) {
+            $tgroup = $db->task_groups->findOne(['_id' => new \MongoDB\BSON\ObjectId($task['group_id']), 'user_id' => $_SESSION['user_id']]);
+            if ($tgroup) {
+                $data = $request->getParsedBody();
+                $title = trim($data['title'] ?? '');
+                $description = trim($data['description'] ?? '');
+                $color = trim($data['color'] ?? '');
+                $due_date = trim($data['due_date'] ?? '');
 
-            $stmt3 = $pdo->prepare("SELECT t.*, tg.name as group_name FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.group_id = ? ORDER BY t.is_completed ASC, t.due_date ASC");
-            $stmt3->execute([$group_id]);
-            $tasks = $stmt3->fetchAll(PDO::FETCH_ASSOC);
-
-            $grouped = [];
-            if (!empty($tasks)) {
-                $grouped[$tasks[0]['group_name']] = $tasks;
+                $db->tasks->updateOne(
+                    ['_id' => new \MongoDB\BSON\ObjectId($id)],
+                    ['$set' => [
+                        'title' => $title,
+                        'description' => $description,
+                        'color' => $color,
+                        'due_date' => $due_date
+                    ]]
+                );
+                return $response->withHeader('Location', '/tasks/' . (string)$task['group_id'])->withStatus(302);
             }
+        }
+        return $response->withHeader('Location', '/tasks')->withStatus(302);
+    });
 
-            return Twig::fromRequest($request)->render($response, 'partials/tasks_items.twig', ['grouped_tasks' => $grouped]);
+    $group->patch('/tasks/{id}/toggle', function (Request $request, Response $response, $args) use ($db) {
+        $id = $args['id'];
+        $task = $db->tasks->findOne(['_id' => new \MongoDB\BSON\ObjectId($id)]);
+        if ($task) {
+            $g_id = $task['group_id'];
+            $tgroup = $db->task_groups->findOne(['_id' => new \MongoDB\BSON\ObjectId($g_id), 'user_id' => $_SESSION['user_id']]);
+            if ($tgroup) {
+                $db->tasks->updateOne(
+                    ['_id' => new \MongoDB\BSON\ObjectId($id)],
+                    ['$set' => ['is_completed' => ($task['is_completed'] ?? 0) ? 0 : 1]]
+                );
+
+                $tasks = getTasksForGroup($db, $g_id, $tgroup['name']);
+                $grouped = [$tgroup['name'] => $tasks];
+                return Twig::fromRequest($request)->render($response, 'partials/tasks_items.twig', ['grouped_tasks' => $grouped]);
+            }
         }
         return $response->withStatus(404);
     });

@@ -2,41 +2,58 @@
 
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-function getDashboardData(PDO $pdo, int $userId): array
+function getDashboardData(\MongoDB\Database $db, string $userId): array
 {
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM recipes WHERE user_id = ?");
-    $stmt->execute([$userId]);
-    $totalRecipes = $stmt->fetchColumn();
+    $totalRecipes = $db->recipes->countDocuments(['user_id' => $userId]);
 
-    $stmt = $pdo->prepare("SELECT id, title FROM recipes WHERE user_id = ? ORDER BY id DESC LIMIT 5");
-    $stmt->execute([$userId]);
-    $recentRecipes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $recentRecipesCursor = $db->recipes->find(['user_id' => $userId], ['sort' => ['_id' => -1], 'limit' => 5]);
+    $recentRecipes = [];
+    foreach ($recentRecipesCursor as $r) {
+        $recentRecipes[] = ['id' => (string)$r['_id'], 'title' => $r['title']];
+    }
 
-    $stmt = $pdo->prepare("
-        SELECT s.name, COUNT(si.id) as pending_count 
-        FROM stores s 
-        LEFT JOIN shopping_items si ON s.id = si.store_id AND si.is_completed = 0
-        WHERE s.user_id = ? 
-        GROUP BY s.name 
-        HAVING pending_count > 0
-    ");
-    $stmt->execute([$userId]);
-    $shoppingStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stores = $db->stores->find(['user_id' => $userId]);
+    $shoppingStats = [];
+    $totalShoppingItems = 0;
+    foreach ($stores as $store) {
+        $storeId = (string)$store['_id'];
+        $count = $db->shopping_items->countDocuments(['store_id' => $storeId, 'is_completed' => 0]);
+        if ($count > 0) {
+            $shoppingStats[] = ['name' => $store['name'], 'pending_count' => $count];
+            $totalShoppingItems += $count;
+        }
+    }
 
-    $totalShoppingItems = array_sum(array_column($shoppingStats, 'pending_count'));
+    $groups = $db->task_groups->find(['user_id' => $userId])->toArray();
+    $groupIds = [];
+    $groupMap = [];
+    foreach ($groups as $g) {
+        $gstr = (string)$g['_id'];
+        $groupIds[] = $gstr;
+        $groupMap[$gstr] = $g['name'];
+    }
 
-    $stmt = $pdo->prepare("
-        SELECT t.id, t.title, t.due_date, t.color, tg.name as group_name, tg.id as group_id
-        FROM tasks t
-        JOIN task_groups tg ON t.group_id = tg.id
-        WHERE tg.user_id = ? AND t.is_completed = 0
-        ORDER BY 
-            CASE WHEN (t.due_date IS NULL OR t.due_date = '') THEN 1 ELSE 0 END, 
-            t.due_date ASC
-        LIMIT 10
-    ");
-    $stmt->execute([$userId]);
-    $urgentTasks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $tasks = [];
+    if (!empty($groupIds)) {
+        $tasks = $db->tasks->find(['group_id' => ['$in' => $groupIds], 'is_completed' => 0])->toArray();
+        usort($tasks, function($a, $b) {
+            $dateA = empty($a['due_date']) ? PHP_INT_MAX : strtotime($a['due_date']);
+            $dateB = empty($b['due_date']) ? PHP_INT_MAX : strtotime($b['due_date']);
+            return $dateA <=> $dateB;
+        });
+    }
+
+    $urgentTasks = [];
+    foreach (array_slice($tasks, 0, 10) as $t) {
+        $urgentTasks[] = [
+            'id' => (string)$t['_id'],
+            'title' => $t['title'],
+            'due_date' => $t['due_date'] ?? null,
+            'color' => $t['color'] ?? null,
+            'group_name' => $groupMap[(string)$t['group_id']] ?? '',
+            'group_id' => (string)$t['group_id']
+        ];
+    }
 
     return [
         'recipes' => ['total' => $totalRecipes, 'recent' => $recentRecipes],
@@ -45,18 +62,23 @@ function getDashboardData(PDO $pdo, int $userId): array
     ];
 }
 
-function getStores(PDO $pdo, int $userId): array
+function getStores(\MongoDB\Database $db, string $userId): array
 {
-    $stmt = $pdo->prepare("SELECT * FROM stores WHERE user_id = ? ORDER BY name ASC");
-    $stmt->execute([$userId]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stores = [];
+    foreach ($db->stores->find(['user_id' => $userId], ['sort' => ['name' => 1]]) as $s) {
+        $s['id'] = (string)$s['_id'];
+        $stores[] = $s;
+    }
+    return $stores;
 }
 
-function getRecipes(PDO $pdo, int $userId): array
+function getRecipes(\MongoDB\Database $db, string $userId): array
 {
-    $stmt = $pdo->prepare("SELECT * FROM recipes WHERE user_id = ? ORDER BY id DESC");
-    $stmt->execute([$userId]);
-    $all = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $all = [];
+    foreach ($db->recipes->find(['user_id' => $userId], ['sort' => ['_id' => -1]]) as $r) {
+        $r['id'] = (string)$r['_id'];
+        $all[] = $r;
+    }
 
     $grouped = [
         'Śniadanie' => [],
@@ -67,7 +89,7 @@ function getRecipes(PDO $pdo, int $userId): array
     ];
 
     foreach ($all as $r) {
-        $cat = $r['category'] ?: 'Inne';
+        $cat = !empty($r['category']) ? $r['category'] : 'Inne';
         if (!isset($grouped[$cat]))
             $cat = 'Inne';
         $grouped[$cat][] = $r;
@@ -79,11 +101,14 @@ function getRecipes(PDO $pdo, int $userId): array
     });
 }
 
-function getTaskGroups(PDO $pdo, int $userId): array
+function getTaskGroups(\MongoDB\Database $db, string $userId): array
 {
-    $stmt = $pdo->prepare("SELECT * FROM task_groups WHERE user_id = ? ORDER BY id DESC");
-    $stmt->execute([$userId]);
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $groups = [];
+    foreach ($db->task_groups->find(['user_id' => $userId], ['sort' => ['_id' => -1]]) as $g) {
+        $g['id'] = (string)$g['_id'];
+        $groups[] = $g;
+    }
+    return $groups;
 }
 
 function __($key, $replace = [])
