@@ -102,7 +102,12 @@ function openTaskModal(title, group, date, color, image, desc) {
 
     const modal = document.getElementById('task-modal');
     const container = document.getElementById('task-modal-container');
+    const header = document.getElementById('main-header');
+    
     modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    if (header) header.classList.add('opacity-0', 'pointer-events-none');
+    
     setTimeout(() => {
         container.classList.remove('translate-y-full');
     }, 10);
@@ -111,7 +116,12 @@ function openTaskModal(title, group, date, color, image, desc) {
 function closeTaskModal() {
     const modal = document.getElementById('task-modal');
     const container = document.getElementById('task-modal-container');
+    const header = document.getElementById('main-header');
+    
     container.classList.add('translate-y-full');
+    document.body.style.overflow = '';
+    if (header) header.classList.remove('opacity-0', 'pointer-events-none');
+    
     setTimeout(() => {
         modal.classList.add('hidden');
     }, 300);

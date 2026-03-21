@@ -165,7 +165,7 @@
         
         <!-- Top Bar (Minimalist) -->
         {% if active_tab != 'dashboard' and active_tab != 'login' and active_tab != 'register' %}
-        <header class="sticky top-0 z-20 bg-[#F8F5F2]/90 dark:bg-[#1A1D1F]/90 backdrop-blur-md px-6 pt-6 pb-4 border-b border-transparent">
+        <header id="main-header" class="sticky top-0 z-20 bg-[#F8F5F2]/90 dark:bg-[#1A1D1F]/90 backdrop-blur-md px-6 pt-6 pb-4 border-b border-transparent">
             <div class="flex items-center justify-between mb-1">
                 <div class="flex items-center gap-4">
                     {% if is_detail_view %}
@@ -232,5 +232,20 @@
         {% endif %}
         
     </div>
+    <script>
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'file' && e.target.name === 'image') {
+                const file = e.target.files[0];
+                if (file) {
+                    const label = e.target.closest('label') || e.target.parentElement;
+                    const span = label.querySelector('span');
+                    if (span) {
+                        span.textContent = '📸 ' + file.name.substring(0, 15) + (file.name.length > 15 ? '...' : '');
+                        label.classList.add('ring-2', 'ring-app-accent');
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

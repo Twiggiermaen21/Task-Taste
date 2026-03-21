@@ -50,7 +50,7 @@ function getDashboardData(PDO $pdo, int $userId): array
     $totalShoppingItems = array_sum(array_column($shoppingStats, 'pending_count'));
 
     $stmt = $pdo->prepare("
-        SELECT t.id, t.title, t.due_date, t.color, tg.name as group_name, tg.id as group_id
+        SELECT t.id, t.title, t.due_date, t.color, t.image, tg.name as group_name, tg.id as group_id
         FROM tasks t
         JOIN task_groups tg ON t.group_id = tg.id
         WHERE tg.user_id = ? AND t.is_completed = 0
