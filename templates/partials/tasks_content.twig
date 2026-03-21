@@ -1,0 +1,23 @@
+<div class="grid grid-cols-2 gap-3 pb-24">
+    {% for group in groups %}
+        <a href="/grocy/tasks/{{ group.id }}" class="{% if loop.index is odd %}bg-app-blue{% else %}bg-[#FFDBDE]{% endif %} rounded-[28px] p-5 aspect-square relative overflow-hidden flex flex-col hover:scale-[1.03] transition-transform active:scale-95 shadow-sm border border-gray-100/50">
+            
+            <div class="w-12 h-12 rounded-full bg-white/40 flex items-center justify-center mb-auto shadow-inner">
+                <svg class="w-6 h-6 text-app-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+            </div>
+            
+            <div class="mt-4">
+                <h3 class="text-[17px] font-black text-app-black tracking-tight leading-tight line-clamp-2">{{ group.name }}</h3>
+                <span class="text-[10px] font-extrabold text-app-black/60 uppercase tracking-widest mt-1 block">Otwórz grupę</span>
+            </div>
+        </a>
+    {% else %}
+        <div class="col-span-2 bg-white rounded-3xl p-8 text-center border border-gray-100/50 shadow-sm mt-4">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+            </div>
+            <p class="text-app-black font-extrabold text-[17px] mb-1">Brak grup zadań</p>
+            <p class="text-[14px] text-gray-400 font-medium">Zarządzaj czasem poprzez dodanie kategorii.</p>
+        </div>
+    {% endfor %}
+</div>

@@ -1,0 +1,59 @@
+{% extends "layout.twig" %}
+{% block header_title %}Szczegóły{% endblock %}
+{% block content %}
+
+{% if recipe.image %}
+<div class="w-full h-64 rounded-[40px] bg-gray-100 mb-6 bg-cover bg-center shadow-inner relative overflow-hidden" style="background-image: url('/grocy/uploads/{{ recipe.image }}')">
+    <div class="absolute inset-0 bg-gradient-to-t from-app-black/90 via-app-black/20 to-transparent flex items-end p-6">
+        <h2 class="text-white text-[32px] font-black tracking-tighter leading-tight relative z-10">{{ recipe.title }}</h2>
+    </div>
+</div>
+{% endif %}
+
+<div class="mb-8 flex justify-between items-start">
+    <div>
+        <div class="inline-block bg-app-yellow px-4 py-1.5 rounded-full mb-3 text-black text-[11px] font-black uppercase tracking-widest shadow-sm">Przepis</div>
+        {% if not recipe.image %}
+            <h2 class="text-[36px] font-black text-app-black tracking-tighter leading-none">{{ recipe.title }}</h2>
+        {% endif %}
+    </div>
+
+    <div class="flex items-center gap-2 mt-2">
+        <a href="/grocy/recipes/{{ recipe.id }}/edit" class="bg-gray-100 text-app-black w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" title="Edytuj">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+        </a>
+        <button hx-delete="/grocy/recipes/{{ recipe.id }}" hx-confirm="Trwale usunąć ten przepis ze zdjęciem?" class="bg-red-50 text-red-600 w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-100 transition-colors" title="Usuń">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+        </button>
+    </div>
+</div>
+
+{% if recipe.instructions %}
+<div class="bg-app-black text-white rounded-[32px] p-7 mb-8 shadow-xl relative overflow-hidden">
+    <!-- decorative shape -->
+    <div class="absolute -bottom-10 -right-10 w-40 h-40 border-[8px] border-white/5 rounded-full"></div>
+    <h3 class="text-xs font-bold opacity-50 mb-3 uppercase tracking-widest flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        Jak przyrządzić
+    </h3>
+    <p class="text-[15px] max-w-sm leading-relaxed relative z-10 font-medium text-white/90">{{ recipe.instructions|nl2br }}</p>
+</div>
+{% endif %}
+
+<div class="flex items-center justify-between mb-5">
+    <h3 class="text-[18px] font-black tracking-tight">Składniki</h3>
+</div>
+
+<form hx-post="/grocy/recipes/{{ recipe.id }}/ingredient" hx-target="#ingredients-list" class="mb-6" onsubmit="setTimeout(()=>this.reset(), 10)">
+    <div class="relative flex items-center bg-white rounded-full p-2 pr-2 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100/50">
+        <input type="text" name="name" placeholder="Np. Cebula (2szt)" required class="flex-1 bg-transparent border-none outline-none font-bold text-app-black placeholder-gray-400 py-3 px-4 text-[15px]">
+        <button type="submit" class="bg-app-black text-white px-6 py-3.5 rounded-full font-bold uppercase tracking-widest text-[11px] flex items-center gap-2 shrink-0 hover:-translate-y-0.5 active:scale-95 transition-transform shadow-[0_4px_14px_rgba(0,0,0,0.15)]">
+            DODAJ
+        </button>
+    </div>
+</form>
+
+<div id="ingredients-list">
+    {% include "partials/recipe_ingredients.twig" %}
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{
+    "name": "kacpe/grocy",
+    "authors": [
+        {
+            "name": "Twiggiermaen21",
+            "email": "kacper.pudelko.kpk@gmail.com"
+        }
+    ],
+    "require": {
+        "slim/slim": "^4.15",
+        "slim/psr7": "^1.8",
+        "slim/twig-view": "^3.4"
+    }
+}

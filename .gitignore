@@ -1,0 +1,30 @@
+# 1. Baza danych (Absolutnie nie chcemy wrzucać Twoich lokalnych danych na GitHuba!)
+/data/*.sqlite
+/data/*.sqlite3
+/data/*.db
+/public/uploads/*
+
+# 2. Zależności PHP (Composer sam pobierze je na serwerze Northflank)
+/vendor/
+
+# 3. Cache i Logi (Dla frameworka Slim i Twig)
+/cache/
+/logs/
+
+# 4. Środowisko i hasła (Gdybyś w przyszłości dodał np. logowanie)
+.env
+.env.local
+.env.*.local
+
+# 5. Śmieci systemowe (macOS i Windows)
+.DS_Store
+Thumbs.db
+ehthumbs.db
+$RECYCLE.BIN/
+
+# 6. Ustawienia edytorów kodu (np. Twój Visual Studio Code)
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj

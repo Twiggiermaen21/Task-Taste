@@ -1,0 +1,94 @@
+<?php
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Views\Twig;
+
+return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
+    $group->get('/recipes', function (Request $request, Response $response) use ($pdo) {
+        return Twig::fromRequest($request)->render($response, 'recipes.twig', ['recipes' => getRecipes($pdo, $_SESSION['user_id']), 'active_tab' => 'recipes']);
+    });
+
+    $group->post('/recipes', function (Request $request, Response $response) use ($pdo) {
+        $data = $request->getParsedBody();
+        $title = trim($data['title'] ?? '');
+        $instructions = trim($data['instructions'] ?? '');
+        $image = handleUpload($request, 'image');
+        
+        if ($title !== '') {
+            $stmt = $pdo->prepare("INSERT INTO recipes (title, instructions, image, user_id) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$title, $instructions, $image, $_SESSION['user_id']]);
+        }
+        return Twig::fromRequest($request)->render($response, 'partials/recipes_content.twig', ['recipes' => getRecipes($pdo, $_SESSION['user_id'])]);
+    });
+
+    $group->delete('/recipes/{id}', function (Request $request, Response $response, $args) use ($pdo) {
+        $id = (int) $args['id'];
+        $stmt = $pdo->prepare("SELECT image FROM recipes WHERE id = ? AND user_id = ?");
+        $stmt->execute([$id, $_SESSION['user_id']]);
+        if ($recipe = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            deleteUploadedFile($recipe['image']);
+            $pdo->prepare("DELETE FROM recipes WHERE id = ?")->execute([$id]);
+        }
+        return $response->withHeader('HX-Redirect', '/grocy/recipes')->withStatus(302);
+    });
+    
+    $group->get('/recipes/{id}/edit', function (Request $request, Response $response, $args) use ($pdo) {
+        $id = (int) $args['id'];
+        $stmt = $pdo->prepare("SELECT * FROM recipes WHERE id = ? AND user_id = ?");
+        $stmt->execute([$id, $_SESSION['user_id']]);
+        $recipe = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$recipe) return $response->withHeader('Location', '/grocy/recipes')->withStatus(302);
+        
+        return Twig::fromRequest($request)->render($response, 'recipe_edit.twig', [
+            'recipe' => $recipe,
+            'active_tab' => 'recipes'
+        ]);
+    });
+    
+    $group->post('/recipes/{id}/edit', function (Request $request, Response $response, $args) use ($pdo) {
+        $id = (int) $args['id'];
+        $stmt = $pdo->prepare("SELECT image FROM recipes WHERE id = ? AND user_id = ?");
+        $stmt->execute([$id, $_SESSION['user_id']]);
+        if ($recipe = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $data = $request->getParsedBody();
+            $title = trim($data['title'] ?? '');
+            $instructions = trim($data['instructions'] ?? '');
+            $newImage = handleUpload($request, 'image');
+
+            if ($newImage) {
+                deleteUploadedFile($recipe['image']);
+                $pdo->prepare("UPDATE recipes SET title = ?, instructions = ?, image = ? WHERE id = ?")->execute([$title, $instructions, $newImage, $id]);
+            } else {
+                $pdo->prepare("UPDATE recipes SET title = ?, instructions = ? WHERE id = ?")->execute([$title, $instructions, $id]);
+            }
+        }
+        return $response->withHeader('Location', '/grocy/recipes/' . $id)->withStatus(302);
+    });
+
+    $group->get('/recipes/{id}', function (Request $request, Response $response, $args) use ($pdo) {
+        $id = (int) $args['id'];
+        $stmt = $pdo->prepare("SELECT * FROM recipes WHERE id = ? AND user_id = ?");
+        $stmt->execute([$id, $_SESSION['user_id']]);
+        $recipe = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$recipe) return $response->withHeader('Location', '/grocy/recipes')->withStatus(302);
+
+        $stmt2 = $pdo->prepare("SELECT * FROM recipe_ingredients WHERE recipe_id = ? ORDER BY id ASC");
+        $stmt2->execute([$id]);
+        return Twig::fromRequest($request)->render($response, 'recipe_view.twig', [
+            'recipe' => $recipe, 'ingredients' => $stmt2->fetchAll(PDO::FETCH_ASSOC), 'active_tab' => 'recipes'
+        ]);
+    });
+
+    $group->post('/recipes/{recipe_id}/ingredient', function (Request $request, Response $response, $args) use ($pdo) {
+        $id = (int) $args['recipe_id'];
+        $check = $pdo->prepare("SELECT id FROM recipes WHERE id = ? AND user_id = ?");
+        $check->execute([$id, $_SESSION['user_id']]);
+        if ($check->fetch()) {
+            $name = trim($request->getParsedBody()['name'] ?? '');
+            if ($name !== '') $pdo->prepare("INSERT INTO recipe_ingredients (recipe_id, name) VALUES (?, ?)")->execute([$id, $name]);
+        }
+        $stmt2 = $pdo->prepare("SELECT * FROM recipe_ingredients WHERE recipe_id = ? ORDER BY id ASC");
+        $stmt2->execute([$id]);
+        return Twig::fromRequest($request)->render($response, 'partials/recipe_ingredients.twig', ['ingredients' => $stmt2->fetchAll(PDO::FETCH_ASSOC), 'recipe' => ['id' => $id]]);
+    });
+};

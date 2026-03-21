@@ -1,0 +1,116 @@
+{% extends "layout.twig" %}
+{% block content %}
+
+<!-- Black Header Area -->
+<div class="bg-app-black text-white sm:rounded-tl-3xl sm:rounded-tr-3xl rounded-b-[40px] px-6 pt-12 pb-24 relative shadow-xl">
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <div class="flex items-center gap-3 mb-1">
+                <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center border border-white/10 shadow-inner">
+                    <span class="text-base font-bold">{{ session.username|first|upper }}</span>
+                </div>
+                <span class="text-white/60 text-sm font-semibold tracking-wide">Moje statystyki</span>
+            </div>
+            
+            <h2 class="text-[36px] font-black tracking-tighter leading-none mt-4">{{ session.username }}</h2>
+        </div>
+        
+        <!-- Notifications bell icon style like on screenshot -->
+        <div class="bg-white/10 w-10 h-10 rounded-full flex items-center justify-center shadow-inner relative">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+            <span class="absolute top-2 right-2.5 w-2 h-2 bg-app-lime rounded-full border border-app-black"></span>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <span class="text-white/50 text-[10px] font-bold uppercase tracking-widest pl-1 mb-1 block">Zaległe braki</span>
+        <div class="flex items-baseline gap-1">
+            <span class="text-white text-4xl font-extrabold tracking-tight">{{ dashboard.shopping.total }}</span>
+            <span class="text-white/80 font-medium text-sm">Przedmiotów</span>
+        </div>
+    </div>
+</div>
+
+<!-- White overlapping card -> "Instant Floats" equivalent -->
+<div class="px-6 -mt-12 relative z-10 font-sans">
+    <div class="bg-white rounded-[28px] p-5 shadow-[0_15px_30px_rgba(0,0,0,0.08)] flex items-center justify-between mb-8 cursor-pointer active:scale-95 transition-transform" onclick="window.location.href='/grocy/shopping'">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-app-black text-white rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <div>
+                <h3 class="font-bold text-base tracking-tight text-app-black">Otwarte sklepy</h3>
+                <p class="text-[13px] text-gray-500 font-medium">Masz {{ dashboard.shopping.by_store|length }} otwarte listy</p>
+            </div>
+        </div>
+        <div class="text-gray-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+        </div>
+    </div>
+
+    <!-- Pastel Blocks -> "Incomes & spendings" equivalent -->
+    <h3 class="text-[17px] font-extrabold mb-3 ml-2 tracking-tight">Katalog</h3>
+    <div class="grid grid-cols-2 gap-4 mb-8">
+        <!-- Shopping block (Lime) -->
+        <a href="/grocy/shopping" class="bg-app-lime rounded-[32px] p-5 aspect-square relative overflow-hidden flex flex-col justify-between hover:scale-[1.03] transition-transform active:scale-95">
+            <div class="w-24 h-24 border-[6px] border-black/5 rounded-full border-t-transparent border-r-transparent absolute -top-8 -right-8"></div>
+            
+            <div class="mb-2 w-12 h-12 rounded-full border-2 border-app-black/90 flex items-center justify-center">
+                <div class="w-[18px] h-[18px] bg-app-black rounded-full shadow-[0_4px_10px_rgba(0,0,0,0.3)]"></div>
+            </div>
+            
+            <div class="mt-auto">
+                <span class="text-[11px] font-bold opacity-70 block mb-0.5">Do skompletowania</span>
+                <strong class="text-3xl font-black block tracking-tighter leading-none">{{ dashboard.shopping.total }}</strong>
+            </div>
+        </a>
+
+        <!-- Recipes block (Purple) -->
+        <a href="/grocy/recipes" class="bg-app-purple rounded-[32px] p-5 aspect-square relative overflow-hidden flex flex-col justify-between hover:scale-[1.03] transition-transform active:scale-95">
+            <div class="w-32 h-32 border-[8px] border-black/5 rounded-full border-b-transparent border-l-transparent absolute -bottom-12 -right-12"></div>
+            
+            <div class="mb-2 w-12 h-12 rounded-full border-2 border-app-black/30 flex items-center justify-center relative">
+                <!-- loading spinner equivalent -->
+                <div class="w-full h-full rounded-full border-2 border-app-black border-t-transparent animate-spin opacity-40"></div>
+                <div class="w-[8px] h-[8px] bg-app-black rounded-full absolute"></div>
+            </div>
+            
+            <div class="mt-auto relative z-10">
+                <span class="text-[11px] font-bold opacity-70 block mb-0.5">Przepisów</span>
+                <strong class="text-3xl font-black block tracking-tighter leading-none">{{ dashboard.recipes.total }}</strong>
+            </div>
+        </a>
+    </div>
+
+    <!-- "Transactions" -> Urgent tasks -->
+    <div class="flex items-center justify-between mb-4 ml-2 mt-4">
+        <h3 class="text-[17px] font-extrabold tracking-tight">Najpilniejsze Zadania</h3>
+    </div>
+    
+    <div class="flex flex-col gap-3">
+        {% for task in dashboard.urgent_tasks %}
+            <a href="/grocy/tasks/{{ task.group_id }}" class="bg-white rounded-3xl p-4 flex items-center gap-4 shadow-sm border border-gray-100/50 hover:shadow-md transition-shadow">
+                
+                <!-- Category colored icon -->
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0" style="background-color: {{ task.color|default('#F0F0F0') }}20;">
+                    <!-- random icon based on task logic or just a fallback -->
+                    <span style="font-size: 20px;">📅</span>
+                </div>
+                
+                <div class="flex-1 overflow-hidden flex flex-col justify-center">
+                    <strong class="block text-[15px] font-bold truncate tracking-tight text-app-black leading-tight mb-0.5">{{ task.title }}</strong>
+                    <span class="text-[12px] text-gray-500 font-semibold block">{{ task.group_name }}</span>
+                </div>
+                
+                <div class="font-extrabold text-[15px] tracking-tight text-app-black">
+                    {{ task.due_date|date('M d') }}
+                </div>
+            </a>
+        {% else %}
+            <div class="bg-white rounded-3xl p-6 text-center text-gray-500 font-medium shadow-sm border border-gray-100/50">
+                Masz czyste konto! Żadnych zaległości.
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

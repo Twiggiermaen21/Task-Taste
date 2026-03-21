@@ -1,0 +1,22 @@
+<div class="flex flex-col gap-2.5 pb-24">
+    {% for item in items %}
+        <label class="bg-white rounded-[24px] p-3 pr-5 flex items-center justify-between shadow-sm border border-gray-100/50 cursor-pointer overflow-hidden group transition-all {% if item.is_completed %}opacity-60 bg-gray-50/50{% else %}hover:-translate-y-0.5 hover:shadow-md active:scale-95{% endif %}">
+            <div class="flex items-center gap-4 w-full">
+                <div class="shrink-0 p-1 flex items-center">
+                    <input type="checkbox" {% if item.is_completed %}checked{% endif %} class="custom-checkbox" hx-patch="/grocy/shopping/item/{{ item.id }}/toggle" hx-target="#shopping-items">
+                </div>
+                <span class="text-[16px] font-bold text-app-black truncate w-full transition-all {% if item.is_completed %}line-through text-gray-400{% endif %}">
+                    {{ item.name }}
+                </span>
+            </div>
+        </label>
+    {% else %}
+        <div class="bg-white rounded-3xl p-8 text-center border border-gray-100/50 shadow-sm mt-4">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+            </div>
+            <p class="text-app-black font-extrabold text-[17px] mb-1">Pusty koszyk</p>
+            <p class="text-[14px] text-gray-400 font-medium">Brak elementów do kupienia.</p>
+        </div>
+    {% endfor %}
+</div>

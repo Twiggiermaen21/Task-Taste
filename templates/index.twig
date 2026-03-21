@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Moje Centrum Dowodzenia</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <main class="container">
+        <h1>🛒 Lista zakupów</h1>
+
+        <form hx-post="/grocy/dodaj" 
+              hx-target="#lista-zakupow" 
+              hx-select="#lista-zakupow" 
+              hx-swap="outerHTML" 
+              hx-on::after-request="this.reset()">
+            <input type="text" name="nazwa" placeholder="Co trzeba kupić?" required>
+            <button type="submit">Dodaj do listy</button>
+        </form>
+
+        <hr>
+
+        <ul id="lista-zakupow">
+            {% for przedmiot in zakupy %}
+                <li>
+                    <label>
+                        <input type="checkbox" 
+                               hx-post="/grocy/zmien/{{ przedmiot.id }}" 
+                               hx-target="#lista-zakupow" 
+                               hx-select="#lista-zakupow" 
+                               hx-swap="outerHTML"
+                               {% if przedmiot.kupione %}checked{% endif %}>
+                        
+                        <span {% if przedmiot.kupione %}style="text-decoration: line-through; color: gray;"{% endif %}>
+                            {{ przedmiot.nazwa }}
+                        </span>
+                    </label>
+                </li>
+            {% else %}
+                <li><p>Wszystko kupione! Lista jest pusta.</p></li>
+            {% endfor %}
+        </ul>
+    </main>
+</body>
+</html>

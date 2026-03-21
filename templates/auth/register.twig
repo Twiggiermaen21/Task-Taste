@@ -1,0 +1,38 @@
+{% extends "layout.twig" %}
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-[70vh]">
+    <div class="bg-white rounded-3xl p-8 w-full max-w-sm shadow-sm border border-slate-100">
+        <div class="text-center mb-8">
+            <h1 class="text-2xl font-medium text-slate-800">Utwórz konto</h1>
+            <p class="text-slate-500 text-sm mt-1">Pierwsze założone konto będzie Administratorem</p>
+        </div>
+
+        {% if error %}
+            <div class="bg-red-50 text-red-600 p-3 rounded-xl text-sm mb-6 text-center border border-red-100">{{ error }}</div>
+        {% endif %}
+
+        <form action="/grocy/register" method="post" class="flex flex-col gap-6">
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Adres E-mail</label>
+                <input type="email" name="email" required class="material-input text-base text-slate-800" placeholder="twój@email.com">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Nazwa Użytkownika</label>
+                <input type="text" name="username" required class="material-input text-base text-slate-800" placeholder="np. JanKowalski">
+            </div>
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Wybierz Hasło</label>
+                <input type="password" name="password" required class="material-input text-base text-slate-800">
+            </div>
+            
+            <button type="submit" class="mt-2 bg-blue-600 text-white rounded-full py-3 font-medium shadow-md hover:bg-blue-700 hover:shadow-lg transition-all active:scale-95">
+                Zarejestruj się
+            </button>
+        </form>
+
+        <p class="mt-6 text-center text-sm text-slate-500">
+            Masz już konto? <a href="/grocy/login" class="text-blue-600 font-medium hover:underline">Zaloguj się</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

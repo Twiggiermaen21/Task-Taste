@@ -1,0 +1,65 @@
+<table class="w-full text-left text-sm whitespace-nowrap">
+    <thead class="bg-slate-50 text-slate-500 font-medium">
+        <tr>
+            <th class="px-6 py-3">ID / E-mail</th>
+            <th class="px-6 py-3">Rola</th>
+            <th class="px-6 py-3 text-right">Akcje</th>
+        </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-100">
+        {% for user in users %}
+            <tr class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-6 py-4">
+                    <div class="font-medium text-slate-800">{{ user.username }}</div>
+                    <div class="text-xs text-slate-500">{{ user.email|default('Brak e-maila') }}</div>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex flex-col gap-1 items-start">
+                        {% if user.is_admin %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider bg-purple-100 text-purple-800">Administrator</span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider bg-slate-100 text-slate-800">Użytkownik</span>
+                        {% endif %}
+
+                        {% if user.is_active == 1 %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider bg-green-100 text-green-800">Aktywny</span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] uppercase font-bold tracking-wider bg-red-100 text-red-800">Zablokowany</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-right">
+                    {% if user.id != session.user_id %}
+                        <div class="flex justify-end gap-2">
+                            {% if user.is_active == 1 %}
+                                <button hx-patch="/grocy/admin/user/{{ user.id }}/toggle-status"
+                                        hx-target="#users-list"
+                                        class="text-orange-600 hover:bg-orange-50 px-3 py-1.5 rounded-lg transition-colors font-medium text-xs border border-orange-200">
+                                    Zablokuj
+                                </button>
+                            {% else %}
+                                <button hx-patch="/grocy/admin/user/{{ user.id }}/toggle-status"
+                                        hx-target="#users-list"
+                                        class="text-green-600 hover:bg-green-50 px-3 py-1.5 rounded-lg transition-colors font-medium text-xs border border-green-200">
+                                    Odblokuj
+                                </button>
+                            {% endif %}
+                            <button hx-delete="/grocy/admin/user/{{ user.id }}"
+                                    hx-confirm="Czy na pewno chcesz usunąć użytkownika '{{ user.username }}'? Wszystkie jego dane zostaną trwale usunięte."
+                                    hx-target="#users-list"
+                                    class="text-red-500 hover:text-red-700 hover:bg-red-50 px-3 py-1.5 rounded-lg transition-colors font-medium text-xs border border-red-200">
+                                Usuń
+                            </button>
+                        </div>
+                    {% else %}
+                        <span class="text-slate-400 text-[10px] uppercase tracking-wider font-bold">To ty</span>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="4" class="px-6 py-8 text-center text-slate-500">Brak zarejestrowanych użytkowników.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

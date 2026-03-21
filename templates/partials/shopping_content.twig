@@ -1,0 +1,32 @@
+<div class="flex flex-col gap-3 pb-24">
+    {% for store in stores %}
+        <a href="/grocy/shopping/{{ store.id }}" class="bg-white rounded-[28px] p-5 flex items-center justify-between shadow-sm border border-gray-100/50 hover:shadow-md transition-shadow group active:scale-[0.98] relative overflow-hidden">
+            {% if store.image %}
+                <!-- Background image low opacity -->
+                <div class="absolute inset-0 bg-cover bg-center opacity-10 grayscale group-hover:grayscale-0 group-hover:opacity-20 transition-all z-0" style="background-image: url('/grocy/uploads/{{ store.image }}')"></div>
+            {% endif %}
+            
+            <div class="flex items-center gap-4 relative z-10">
+                <div class="w-14 h-14 rounded-2xl bg-app-lime flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform">
+                    <svg class="w-6 h-6 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                </div>
+                <div>
+                    <h3 class="text-[18px] font-extrabold text-app-black tracking-tight leading-tight">{{ store.name }}</h3>
+                    <span class="text-gray-500 font-semibold text-[13px] block mt-0.5">Wejdź wgłąb</span>
+                </div>
+            </div>
+            
+            <div class="text-gray-300 group-hover:text-app-black transition-colors relative z-10">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+            </div>
+        </a>
+    {% else %}
+        <div class="bg-white rounded-3xl p-8 text-center border border-gray-100/50 shadow-sm mt-4">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+            </div>
+            <p class="text-app-black font-extrabold text-[17px] mb-1">Brak sklepów</p>
+            <p class="text-[14px] text-gray-400 font-medium">Dodaj swój pierwszy sklep używając paska wyżej.</p>
+        </div>
+    {% endfor %}
+</div>
