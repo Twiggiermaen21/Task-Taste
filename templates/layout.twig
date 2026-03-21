@@ -165,25 +165,35 @@
         
         <!-- Top Bar (Minimalist) -->
         {% if active_tab != 'dashboard' and active_tab != 'login' and active_tab != 'register' %}
-        <header class="sticky top-0 z-20 bg-[#F8F5F2]/90 dark:bg-[#1A1D1F]/90 backdrop-blur-md px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-4">
-                {% if is_detail_view %}
-                <a href="/grocy/{% if active_tab == 'settings' or active_tab == 'admin' %}dashboard{% else %}{{ active_tab }}{% endif %}" class="w-10 h-10 bg-white dark:bg-white/10 rounded-full shadow-sm flex items-center justify-center text-app-black dark:text-white hover:-translate-x-1 transition-transform">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
-                </a>
-                <h1 class="text-xl font-bold tracking-tight dark:text-white">{% block header_title %}{{ __('back') }}{% endblock %}</h1>
+        <header class="sticky top-0 z-20 bg-[#F8F5F2]/90 dark:bg-[#1A1D1F]/90 backdrop-blur-md px-6 pt-6 pb-4 border-b border-transparent">
+            <div class="flex items-center justify-between mb-1">
+                <div class="flex items-center gap-4">
+                    {% if is_detail_view %}
+                        <a href="/grocy/{% if active_tab == 'settings' or active_tab == 'admin' %}dashboard{% else %}{{ active_tab }}{% endif %}" class="w-10 h-10 bg-white dark:bg-white/10 rounded-full shadow-sm flex items-center justify-center text-app-black dark:text-white hover:-translate-x-1 transition-transform">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
+                        </a>
+                        <h1 class="text-xl font-bold tracking-tight dark:text-white">{% block header_title %}{{ __('back') }}{% endblock %}</h1>
+                    {% else %}
+                        <h1 class="text-[32px] font-black tracking-tighter text-app-black dark:text-white leading-none">{% block main_title %}{% endblock %}</h1>
+                    {% endif %}
+                </div>
+                
+                {% if session.user_id %}
+                <div class="flex items-center gap-3">
+                    <a href="/grocy/settings" class="w-10 h-10 bg-white/20 dark:bg-white/10 rounded-full flex items-center justify-center border border-white/10 shadow-inner overflow-hidden hover:bg-white/30 transition-all">
+                        {% if session.avatar and session.avatar|length > 2 %}
+                            <div class="w-full h-full bg-cover bg-center" style="background-image: url('/grocy/uploads/{{ session.avatar }}')"></div>
+                        {% else %}
+                            <span class="text-base text-white font-bold">{{ session.avatar|default(session.username|first|upper) }}</span>
+                        {% endif %}
+                    </a>
+                </div>
                 {% endif %}
             </div>
-            {% if session.user_id %}
-            <div class="flex items-center gap-3">
-                <a href="/grocy/settings" class="w-10 h-10 bg-white/20 dark:bg-white/10 rounded-full flex items-center justify-center border border-white/10 shadow-inner overflow-hidden hover:bg-white/30 transition-all">
-                    {% if session.avatar and session.avatar|length > 2 %}
-                        <div class="w-full h-full bg-cover bg-center" style="background-image: url('/grocy/uploads/{{ session.avatar }}')"></div>
-                    {% else %}
-                        <span class="text-base text-white font-bold">{{ session.avatar|default(session.username|first|upper) }}</span>
-                    {% endif %}
-                </a>
-            </div>{% endif %}
+            
+            {% if not is_detail_view %}
+                <p class="text-[13px] text-gray-500 dark:text-gray-400 font-medium opacity-80">{% block main_subtitle %}{% endblock %}</p>
+            {% endif %}
         </header>
         {% endif %}
 
