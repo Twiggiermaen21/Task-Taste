@@ -1,96 +1,47 @@
-<div class="flex flex-col gap-3 pb-24">
-    {% for task in tasks %}
-        <div class="bg-white rounded-[24px] p-3 shadow-sm border border-gray-100/50 flex flex-col overflow-hidden transition-all {% if task.is_completed %}opacity-50 bg-gray-50/50{% else %}hover:-translate-y-0.5 hover:shadow-md active:scale-95{% endif %} relative group">
+<div class="flex flex-col gap-4 pb-24">
+    {% for group, items in grouped_tasks %}
+        <div class="mb-4">
+            <h3 class="text-[18px] font-black tracking-tight text-app-black dark:text-white uppercase mb-3 ml-2">{{ group }}</h3>
             
-            {% if task.image %}
-                <!-- Background image low opacity -->
-                <div class="absolute inset-0 top-0 left-0 w-full h-1/2 bg-cover bg-center opacity-40 z-0 transition-opacity" style="background-image: url('/grocy/uploads/{{ task.image }}')">
-                    <div class="absolute inset-0 bg-gradient-to-t from-white to-transparent"></div>
-                </div>
-            {% endif %}
-
-            <div class="flex items-center gap-3 relative z-10 w-full">
-                <!-- Toggle logic separated from body -->
-                <label class="shrink-0 flex items-center p-2 pl-1 cursor-pointer">
-                    <input type="checkbox" {% if task.is_completed %}checked{% endif %} class="custom-checkbox shadow-inner" hx-patch="/grocy/tasks/{{ task.id }}/toggle" hx-target="#tasks-list">
-                </label>
-                
-                <div class="w-10 h-10 rounded-[14px] flex items-center justify-center shrink-0 transition-opacity shadow-inner {% if task.is_completed %}grayscale{% endif %}" style="background-color: {{ task.color|default('#E2D5FC') }}40;">
-                    <span class="w-2.5 h-2.5 rounded-full" style="background-color: {{ task.color|default('#E2D5FC') }};"></span>
-                </div>
-                
-                <div class="flex-1 overflow-hidden flex flex-col justify-center cursor-pointer" onclick="document.getElementById('task-modal-{{ task.id }}').classList.remove('hidden')">
-                    <span class="text-[15px] font-bold text-app-black truncate w-full transition-all {% if task.is_completed %}line-through text-gray-400{% endif %}">
-                        {{ task.title }}
-                    </span>
-                    {% if task.due_date and not task.is_completed %}
-                        <span class="text-[11px] font-extrabold text-orange-600 mt-1 uppercase tracking-widest flex items-center gap-1">
-                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            {{ task.due_date|date('d.m') }}
-                        </span>
-                    {% elseif task.description %}
-                        <span class="text-[12px] text-gray-500 font-medium truncate w-full mt-0.5">{{ task.description }}</span>
-                    {% endif %}
-                </div>
-                
-                <!-- Action Buttons: Edit and Delete -->
-                <div class="flex flex-col gap-1.5 items-center shrink-0 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
-                     <a href="/grocy/tasks/task/{{ task.id }}/edit" class="text-app-black/50 hover:text-app-black w-7 h-7 flex items-center justify-center bg-gray-50 rounded-full transition-all border border-gray-100">
-                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                     </a>
-                     <button hx-delete="/grocy/tasks/task/{{ task.id }}" hx-target="#tasks-list" class="text-red-400 hover:text-red-600 w-7 h-7 flex items-center justify-center bg-red-50 rounded-full transition-all border border-red-100">
-                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                     </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Task Info Modal -->
-        <div id="task-modal-{{ task.id }}" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-app-black/40 backdrop-blur-sm transition-opacity">
-            <div class="bg-white rounded-[40px] w-full max-w-lg overflow-hidden shadow-2xl animate-fade-in-up flex flex-col max-h-[90vh]">
-                
-                {% if task.image %}
-                    <div class="w-full h-64 bg-cover bg-center shrink-0 border-b border-gray-100" style="background-image: url('/grocy/uploads/{{ task.image }}')"></div>
-                {% endif %}
-
-                <div class="p-8 overflow-y-auto">
-                    <div class="flex items-start justify-between mb-4">
-                        <div class="w-14 h-14 rounded-[20px] flex items-center justify-center shrink-0 shadow-inner" style="background-color: {{ task.color|default('#E2D5FC') }}30;">
-                            <span class="w-5 h-5 rounded-full" style="background-color: {{ task.color|default('#E2D5FC') }};"></span>
-                        </div>
+            <div class="flex flex-col gap-3">
+                {% for task in items %}
+                    <div class="bg-white dark:bg-[#1A1D1F] rounded-[28px] p-4 flex items-center gap-4 shadow-sm border border-gray-100/50 dark:border-white/5 transition-all {% if task.is_completed %}opacity-50 grayscale dark:bg-gray-800/10{% else %}hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]{% endif %} group pointer-events-auto relative overflow-hidden">
                         
-                        <button onclick="document.getElementById('task-modal-{{ task.id }}').classList.add('hidden')" class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center text-gray-500 transition-colors shrink-0">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
-                        </button>
-                    </div>
-                    
-                    <h2 class="text-[32px] font-black tracking-tight text-app-black leading-tight mb-3">{{ task.title }}</h2>
-                    
-                    {% if task.due_date %}
-                        <div class="inline-flex items-center gap-2 px-4 py-2 bg-orange-50 text-orange-600 rounded-full text-[13px] font-black uppercase tracking-widest mb-4">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            {{ task.due_date }}
+                        <label class="shrink-0 flex items-center p-2 cursor-pointer z-20">
+                            <input type="checkbox" {% if task.is_completed %}checked{% endif %} class="custom-checkbox" hx-patch="/grocy/tasks/item/{{ task.id }}/toggle" hx-target="#tasks-list">
+                        </label>
+                        
+                        <div class="flex-1 min-w-0 cursor-pointer z-10" onclick="openTaskModal('{{ task.title|e('js') }}', '{{ group|e('js') }}', '{{ task.due_date }}', '{{ task.color }}')">
+                            <strong class="block text-[16px] font-bold truncate tracking-tight text-app-black dark:text-white leading-tight mb-0.5 {% if task.is_completed %}line-through text-gray-400 dark:text-gray-500{% endif %}">
+                                {{ task.title }}
+                            </strong>
+                            <div class="flex items-center gap-3">
+                                <span class="text-[12px] text-gray-500 dark:text-gray-400 font-semibold flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full" style="background-color: {{ task.color|default('#CBD5E0') }}"></span>
+                                    {% if task.due_date %}
+                                        {{ task.due_date|date('d M Y') }}
+                                    {% endif %}
+                                </span>
+                            </div>
                         </div>
-                    {% endif %}
 
-                    {% if task.description %}
-                        <div class="text-[16px] text-gray-500 font-medium leading-relaxed mt-2 p-4 bg-gray-50 rounded-[24px]">
-                            {{ task.description|nl2br }}
+                        <div class="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                            <a href="/grocy/tasks/item/{{ task.id }}/edit" class="w-9 h-9 flex items-center justify-center bg-gray-50 dark:bg-gray-800 text-app-black/50 dark:text-white/50 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors border border-gray-100 dark:border-white/5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                            </a>
+                            <button hx-delete="/grocy/tasks/item/{{ task.id }}" hx-target="#tasks-list" hx-confirm="{{ __('confirm_delete')|default('Usunąć to zadanie?') }}" class="w-9 h-9 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 rounded-full hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors border border-red-100 dark:border-red-900/30">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            </button>
                         </div>
-                    {% endif %}
-                    
-                    <div class="mt-8 pt-6 border-t border-gray-100 flex gap-3">
-                         <a href="/grocy/tasks/task/{{ task.id }}/edit" class="flex-1 bg-[#E2D5FC] text-black py-4 rounded-full font-black uppercase tracking-widest text-[13px] text-center hover:scale-[1.02] active:scale-95 transition-all shadow-sm">
-                             Edytuj Opcje
-                         </a>
                     </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     {% else %}
-        <div class="bg-transparent rounded-3xl p-6 text-center border-2 border-dashed border-gray-200 mt-2 hover:bg-white transition-colors">
-            <p class="text-app-black font-extrabold text-[15px] mb-1">Czyste konto</p>
-            <p class="text-[13px] text-gray-500 font-medium">Brak zadań w tej grupie.</p>
+        <div class="bg-white dark:bg-[#1A1D1F] rounded-[40px] p-12 text-center border border-gray-100/50 dark:border-white/5 shadow-sm mt-4">
+            <div class="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl">✅</div>
+            <h3 class="text-xl font-black text-app-black dark:text-white mb-2">{{ __('no_tasks') }}</h3>
+            <p class="text-gray-500 dark:text-gray-400 font-medium">{{ __('no_tasks_desc') }}</p>
         </div>
     {% endfor %}
 </div>

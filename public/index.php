@@ -17,6 +17,7 @@ if (!is_dir($dataDir)) mkdir($dataDir, 0777, true);
 
 $uploadsDir = __DIR__ . '/uploads';
 if (!is_dir($uploadsDir)) mkdir($uploadsDir, 0777, true);
+if (!is_dir($uploadsDir . '/avatars')) mkdir($uploadsDir . '/avatars', 0777, true);
 
 // Database connection
 $dbPath = $dataDir . '/database.sqlite';

@@ -6,9 +6,13 @@
     <div class="flex justify-between items-start mb-6">
         <div>
             <div class="flex items-center gap-3 mb-1">
-                <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center border border-white/10 shadow-inner">
-                    <span class="text-base font-bold">{{ session.username|first|upper }}</span>
-                </div>
+                <a href="/grocy/settings" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center border border-white/10 shadow-inner overflow-hidden hover:bg-white/30 transition-all active:scale-95">
+                    {% if session.avatar and session.avatar|length > 2 %}
+                        <div class="w-full h-full bg-cover bg-center" style="background-image: url('/grocy/uploads/{{ session.avatar }}')"></div>
+                    {% else %}
+                        <span class="text-base font-bold">{{ session.avatar|default(session.username|first|upper) }}</span>
+                    {% endif %}
+                </a>
                 <span class="text-white/60 text-sm font-semibold tracking-wide">{{ __('my_stats') }}</span>
             </div>
             
@@ -29,26 +33,26 @@
 
 <!-- White overlapping card -> "Instant Floats" equivalent -->
 <div class="px-6 -mt-12 relative z-10 font-sans">
-    <div class="bg-white rounded-[28px] p-5 shadow-[0_15px_30px_rgba(0,0,0,0.08)] flex items-center justify-between mb-8 cursor-pointer active:scale-95 transition-transform" onclick="window.location.href='/grocy/shopping'">
+    <div class="bg-white dark:bg-[#1A1D1F] rounded-[28px] p-5 shadow-[0_15px_30px_rgba(0,0,0,0.08)] flex items-center justify-between mb-8 cursor-pointer active:scale-95 transition-transform border border-transparent dark:border-white/5" onclick="window.location.href='/grocy/shopping'">
         <div class="flex items-center gap-4">
-            <div class="w-12 h-12 bg-app-black text-white rounded-full flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+            <div class="w-12 h-12 bg-app-black dark:bg-app-accent rounded-full flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-white dark:text-app-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
             </div>
             <div>
-                <h3 class="font-bold text-base tracking-tight text-app-black">{{ __('shopping_list') }}</h3>
-                <p class="text-[13px] text-gray-500 font-medium">{{ __('open_lists')|replace({'%d': dashboard.shopping.by_store|length}) }}</p>
+                <h3 class="font-bold text-base tracking-tight text-app-black dark:text-white">{{ __('shopping_list') }}</h3>
+                <p class="text-[13px] text-gray-500 dark:text-gray-400 font-medium">{{ __('open_lists')|replace({'%d': dashboard.shopping.by_store|length}) }}</p>
             </div>
         </div>
         <div class="text-gray-400">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"></path></svg>
         </div>
     </div>
 
     <!-- Pastel Blocks -> "Incomes & spendings" equivalent -->
-    <h3 class="text-[17px] font-extrabold mb-3 ml-2 tracking-tight">Katalog</h3>
+    <h3 class="text-[17px] font-extrabold mb-3 ml-2 tracking-tight dark:text-white">{{ __('catalog') }}</h3>
     <div class="grid grid-cols-2 gap-4 mb-8">
-        <!-- Shopping block (Lime) -->
-        <a href="/grocy/shopping" class="bg-app-lime rounded-[32px] p-5 aspect-square relative overflow-hidden flex flex-col justify-between hover:scale-[1.03] transition-transform active:scale-95">
+        <!-- Shopping block (Accent) -->
+        <a href="/grocy/shopping" class="rounded-[32px] p-5 aspect-square relative overflow-hidden flex flex-col justify-between hover:scale-[1.03] transition-transform active:scale-95 shadow-sm" style="background-color: var(--app-accent)">
             <div class="w-24 h-24 border-[6px] border-black/5 rounded-full border-t-transparent border-r-transparent absolute -top-8 -right-8"></div>
             
             <div class="mb-2 w-12 h-12 rounded-full border-2 border-app-black/90 flex items-center justify-center">
@@ -56,55 +60,54 @@
             </div>
             
             <div class="mt-auto">
-                <span class="text-[11px] font-bold opacity-70 block mb-0.5">Do skompletowania</span>
-                <strong class="text-3xl font-black block tracking-tighter leading-none">{{ dashboard.shopping.total }}</strong>
+                <span class="text-[11px] font-bold text-app-black opacity-70 block mb-0.5">{{ __('to_complete')|default('Do skompletowania') }}</span>
+                <strong class="text-3xl font-black block tracking-tighter leading-none text-app-black">{{ dashboard.shopping.total }}</strong>
             </div>
         </a>
 
         <!-- Recipes block (Purple) -->
-        <a href="/grocy/recipes" class="bg-app-purple rounded-[32px] p-5 aspect-square relative overflow-hidden flex flex-col justify-between hover:scale-[1.03] transition-transform active:scale-95">
+        <a href="/grocy/recipes" class="bg-app-purple rounded-[32px] p-5 aspect-square relative overflow-hidden flex flex-col justify-between hover:scale-[1.03] transition-transform active:scale-95 shadow-sm">
             <div class="w-32 h-32 border-[8px] border-black/5 rounded-full border-b-transparent border-l-transparent absolute -bottom-12 -right-12"></div>
             
-            <div class="mb-2 w-12 h-12 rounded-full border-2 border-app-black/30 flex items-center justify-center relative">
-                <!-- loading spinner equivalent -->
-                <div class="w-full h-full rounded-full border-2 border-app-black border-t-transparent animate-spin opacity-40"></div>
-                <div class="w-[8px] h-[8px] bg-app-black rounded-full absolute"></div>
+            <div class="mb-2 w-12 h-12 rounded-full border-2 border-app-black/30 dark:border-white/20 flex items-center justify-center relative">
+                <div class="w-full h-full rounded-full border-2 border-app-black dark:border-white border-t-transparent animate-spin opacity-40"></div>
+                <div class="w-[8px] h-[8px] bg-app-black dark:bg-white rounded-full absolute"></div>
             </div>
             
             <div class="mt-auto relative z-10">
-                <span class="text-[11px] font-bold opacity-70 block mb-0.5">Przepisów</span>
-                <strong class="text-3xl font-black block tracking-tighter leading-none">{{ dashboard.recipes.total }}</strong>
+                <span class="text-[11px] font-bold text-app-black opacity-70 block mb-0.5">{{ __('recipes') }}</span>
+                <strong class="text-3xl font-black block tracking-tighter leading-none text-app-black">{{ dashboard.recipes.total }}</strong>
             </div>
         </a>
     </div>
 
     <!-- "Transactions" -> Urgent tasks -->
     <div class="flex items-center justify-between mb-4 ml-2 mt-4">
-        <h3 class="text-[17px] font-extrabold tracking-tight">Najpilniejsze Zadania</h3>
+        <h3 class="text-[17px] font-extrabold tracking-tight dark:text-white">{{ __('urgent_tasks') }}</h3>
     </div>
     
     <div class="flex flex-col gap-3">
         {% for task in dashboard.urgent_tasks %}
-            <a href="/grocy/tasks/{{ task.group_id }}" class="bg-white rounded-3xl p-4 flex items-center gap-4 shadow-sm border border-gray-100/50 hover:shadow-md transition-shadow">
+            <a href="/grocy/tasks/{{ task.group_id }}" class="bg-white dark:bg-[#1A1D1F] rounded-3xl p-4 flex items-center gap-4 shadow-sm border border-gray-100/50 dark:border-white/5 hover:shadow-md transition-shadow">
                 
                 <!-- Category colored icon -->
-                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0" style="background-color: {{ task.color|default('#F0F0F0') }}20;">
-                    <!-- random icon based on task logic or just a fallback -->
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0" style="background-color: {{ task.color|default('#F0F0F0') }}40;">
                     <span style="font-size: 20px;">📅</span>
                 </div>
                 
                 <div class="flex-1 overflow-hidden flex flex-col justify-center">
-                    <strong class="block text-[15px] font-bold truncate tracking-tight text-app-black leading-tight mb-0.5">{{ task.title }}</strong>
-                    <span class="text-[12px] text-gray-500 font-semibold block">{{ task.group_name }}</span>
+                    <strong class="block text-[15px] font-bold truncate tracking-tight text-app-black dark:text-white leading-tight mb-0.5">{{ task.title }}</strong>
+                    <span class="text-[12px] text-gray-500 dark:text-gray-400 font-semibold block">{{ task.group_name }}</span>
                 </div>
                 
-                <div class="font-extrabold text-[15px] tracking-tight text-app-black">
+                <div class="font-extrabold text-[15px] tracking-tight text-app-black dark:text-white">
                     {{ task.due_date|date('M d') }}
                 </div>
             </a>
         {% else %}
-            <div class="bg-white rounded-3xl p-6 text-center text-gray-500 font-medium shadow-sm border border-gray-100/50">
-                Masz czyste konto! Żadnych zaległości.
+            <div class="bg-white dark:bg-[#1A1D1F] rounded-3xl p-6 text-center text-gray-500 dark:text-gray-400 font-medium shadow-sm border border-gray-100/50 dark:border-white/5">
+                <p class="text-app-black dark:text-white font-bold">{{ __('no_tasks') }}</p>
+                <p class="text-sm opacity-60">{{ __('no_tasks_desc') }}</p>
             </div>
         {% endfor %}
     </div>

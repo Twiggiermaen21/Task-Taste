@@ -1,50 +1,49 @@
 {% extends "layout.twig" %}
-{% block header_title %}Edytuj Przepis{% endblock %}
+{% block header_title %}{{ __('edit_recipe') }}{% endblock %}
 {% block content %}
 <div class="mb-8 mt-2">
-    <div class="inline-block bg-app-yellow px-4 py-1.5 rounded-full mb-3 text-black text-[11px] font-black uppercase tracking-widest shadow-sm">Kucharz</div>
-    <h2 class="text-[36px] font-black text-app-black tracking-tighter leading-none">Modyfikuj</h2>
+    <div class="inline-block bg-app-yellow dark:bg-app-accent px-4 py-1.5 rounded-full mb-3 text-black text-[11px] font-black uppercase tracking-widest shadow-sm">{{ __('Kucharz') }}</div>
+    <h2 class="text-[36px] font-black text-app-black dark:text-white tracking-tighter leading-none">{{ __('modify_recipe') }}</h2>
 </div>
 
-<form action="/grocy/recipes/{{ recipe.id }}/edit" method="post" enctype="multipart/form-data" class="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100/50 space-y-6">
+<form action="/grocy/recipes/{{ recipe.id }}/edit" method="post" enctype="multipart/form-data" class="bg-white dark:bg-[#1A1D1F] rounded-[32px] p-6 shadow-sm border border-gray-100/50 dark:border-white/5 space-y-6">
     <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Tytuł potrawy</label>
-        <input type="text" name="title" value="{{ recipe.title }}" required class="w-full bg-gray-50 rounded-2xl border-none outline-none font-bold text-app-black px-4 py-3 text-[16px] focus:ring-2 focus:ring-app-black transition-all shadow-inner">
+        <label class="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ __('recipe_title_label') }}</label>
+        <input type="text" name="title" value="{{ recipe.title }}" required class="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl border-none outline-none font-bold text-app-black dark:text-white px-4 py-3 text-[16px] focus:ring-2 focus:ring-app-black dark:focus:ring-app-accent transition-all shadow-inner">
     </div>
 
     <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Sposób przygotowania</label>
-        <textarea name="instructions" class="w-full bg-gray-50 rounded-2xl border-none outline-none font-medium text-app-black px-4 py-3 text-[14px] focus:ring-2 focus:ring-app-black transition-all shadow-inner resize-none h-28">{{ recipe.instructions }}</textarea>
+        <label class="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ __('instructions_label') }}</label>
+        <textarea name="instructions" class="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl border-none outline-none font-medium text-app-black dark:text-white px-4 py-3 text-[14px] focus:ring-2 focus:ring-app-black dark:focus:ring-app-accent transition-all shadow-inner resize-none h-28">{{ recipe.instructions }}</textarea>
     </div>
     
     <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Rodzaj Posiłku</label>
-        <select name="category" class="w-full bg-gray-50 rounded-2xl border-none outline-none font-bold text-app-black px-4 py-3 text-[15px] focus:ring-2 focus:ring-app-black transition-all shadow-inner appearance-none cursor-pointer">
-            <option value="Śniadanie" {% if recipe.category == 'Śniadanie' %}selected{% endif %}>🥐 Śniadanie</option>
-            <option value="Obiad" {% if recipe.category == 'Obiad' %}selected{% endif %}>🍲 Obiad</option>
-            <option value="Kolacja" {% if recipe.category == 'Kolacja' %}selected{% endif %}>🌙 Kolacja</option>
-            <option value="Deser" {% if recipe.category == 'Deser' %}selected{% endif %}>🍰 Deser</option>
-            <option value="Inne" {% if recipe.category == 'Inne' %}selected{% endif %}>🍳 Inne</option>
+        <label class="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ __('meal_type') }}</label>
+        <select name="category" class="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl border-none outline-none font-bold text-app-black dark:text-white px-4 py-3 text-[15px] focus:ring-2 focus:ring-app-black dark:focus:ring-app-accent transition-all shadow-inner appearance-none cursor-pointer">
+            <option value="Śniadanie" {% if recipe.category == 'Śniadanie' %}selected{% endif %}>🥐 {{ __('Śniadanie') }}</option>
+            <option value="Obiad" {% if recipe.category == 'Obiad' %}selected{% endif %}>🍲 {{ __('Obiad') }}</option>
+            <option value="Kolacja" {% if recipe.category == 'Kolacja' %}selected{% endif %}>🌙 {{ __('Kolacja') }}</option>
+            <option value="Deser" {% if recipe.category == 'Deser' %}selected{% endif %}>🍰 {{ __('Deser') }}</option>
+            <option value="Inne" {% if recipe.category == 'Inne' %}selected{% endif %}>🍳 {{ __('Inne') }}</option>
         </select>
     </div>
     
     <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Zdjęcie Dania</label>
+        <label class="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ __('recipe_image_label') }}</label>
         {% if recipe.image %}
-            <div class="w-full h-40 rounded-2xl bg-gray-100 bg-cover bg-center mb-3 shadow-inner" style="background-image: url('/grocy/uploads/{{ recipe.image }}')"></div>
-            <p class="text-[12px] text-gray-500 font-medium mb-2">Wyślij inny plik by zastąpić stare apetyczne foto.</p>
+            <div class="w-full h-40 rounded-2xl bg-gray-100 dark:bg-gray-800 bg-cover bg-center mb-3 shadow-inner border border-gray-100 dark:border-white/5" style="background-image: url('/grocy/uploads/{{ recipe.image }}')"></div>
         {% else %}
-            <div class="w-full h-24 rounded-2xl bg-gray-50 flex items-center justify-center border-2 border-dashed border-gray-200 mb-3">
-                <span class="text-[13px] text-gray-400 font-bold">Zrób i dodaj zdjęcie</span>
+            <div class="w-full h-24 rounded-2xl bg-gray-50 dark:bg-gray-800 flex items-center justify-center border-2 border-dashed border-gray-200 dark:border-white/10 mb-3">
+                <span class="text-[13px] text-gray-400 dark:text-gray-500 font-bold">{{ __('upload_own') }}</span>
             </div>
         {% endif %}
         
-        <input type="file" name="image" accept="image/*" class="text-[12px] text-gray-600 file:mr-4 file:py-2 file:px-6 file:rounded-[20px] file:border-0 file:text-[12px] file:font-bold file:bg-app-black file:text-white hover:file:bg-gray-800 transition-colors w-full cursor-pointer outline-none">
+        <input type="file" name="image" accept="image/*" class="text-[12px] text-gray-600 dark:text-gray-400 file:mr-4 file:py-2 file:px-6 file:rounded-[20px] file:border-0 file:text-[12px] file:font-bold file:bg-app-black dark:file:bg-app-accent file:text-white dark:file:text-app-black hover:file:bg-gray-800 transition-colors w-full cursor-pointer outline-none">
     </div>
     
     <div class="pt-4">
-        <button type="submit" class="w-full bg-app-yellow text-black py-4 rounded-full font-black uppercase tracking-widest text-[13px] hover:-translate-y-1 active:scale-95 transition-transform shadow-[0_8px_20px_rgba(255,244,202,0.6)]">
-            Aktualizuj Przepis
+        <button type="submit" class="w-full bg-app-black dark:bg-app-accent text-white dark:text-app-black py-4 rounded-full font-black uppercase tracking-widest text-[13px] hover:-translate-y-1 active:scale-95 transition-transform shadow-lg">
+            {{ __('update_recipe') }}
         </button>
     </div>
 </form>

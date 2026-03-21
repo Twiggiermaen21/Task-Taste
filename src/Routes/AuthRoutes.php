@@ -28,6 +28,7 @@ return function ($app, PDO $pdo) {
             $_SESSION['theme_color'] = $user['theme_color'];
             $_SESSION['language'] = $user['language'];
             $_SESSION['avatar'] = $user['avatar'];
+            $_SESSION['theme_mode'] = $user['theme_mode'] ?? 'light';
             return $response->withHeader('Location', '/grocy/dashboard')->withStatus(302);
         }
         return Twig::fromRequest($request)->render($response, 'auth/login.twig', ['error' => 'Nieprawidłowy e-mail lub hasło.']);

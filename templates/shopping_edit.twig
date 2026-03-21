@@ -1,20 +1,20 @@
 {% extends "layout.twig" %}
-{% block header_title %}Edycja: {{ store.name|slice(0, 15) }}{% endblock %}
+{% block header_title %}{{ __('edit_store') }}{% endblock %}
 {% block content %}
 <div class="mb-8 mt-2">
-    <div class="inline-block bg-app-lime px-4 py-1.5 rounded-full mb-3 text-black text-[11px] font-black uppercase tracking-widest shadow-sm">Korekta</div>
-    <h2 class="text-[36px] font-black text-app-black tracking-tighter leading-none">Modyfikuj Sklep</h2>
+    <div class="inline-block bg-app-lime dark:bg-app-accent px-4 py-1.5 rounded-full mb-3 text-black text-[11px] font-black uppercase tracking-widest shadow-sm">{{ __('Korekta') }}</div>
+    <h2 class="text-[36px] font-black text-app-black dark:text-white tracking-tighter leading-none">{{ __('modify_store') }}</h2>
 </div>
 
-<form action="/grocy/shopping/store/{{ store.id }}/edit" method="post" class="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100/50 space-y-6">
+<form action="/grocy/shopping/store/{{ store.id }}/edit" method="post" class="bg-white dark:bg-[#1A1D1F] rounded-[32px] p-6 shadow-sm border border-gray-100/50 dark:border-white/5 space-y-6">
     <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Nazwa Sklepu</label>
-        <input type="text" name="name" value="{{ store.name }}" required class="w-full bg-gray-50 rounded-2xl border-none outline-none font-bold text-app-black px-4 py-3 text-[16px] focus:ring-2 focus:ring-app-black transition-all shadow-inner">
+        <label class="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ __('store_name') }}</label>
+        <input type="text" name="name" value="{{ store.name }}" required class="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl border-none outline-none font-bold text-app-black dark:text-white px-4 py-3 text-[16px] focus:ring-2 focus:ring-app-black dark:focus:ring-app-accent transition-all shadow-inner">
     </div>
     
     <div class="pt-4">
-        <button type="submit" class="w-full bg-app-lime text-black py-4 rounded-full font-black uppercase tracking-widest text-[13px] hover:-translate-y-1 active:scale-95 transition-transform shadow-[0_8px_20px_rgba(212,246,123,0.4)]">
-            Zaktualizuj Skrót
+        <button type="submit" class="w-full bg-app-black dark:bg-app-accent text-white dark:text-app-black py-4 rounded-full font-black uppercase tracking-widest text-[13px] hover:-translate-y-1 active:scale-95 transition-transform shadow-lg">
+            {{ __('update_store') }}
         </button>
     </div>
 </form>

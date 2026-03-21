@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="pl" class="{% if session.theme_mode == 'dark' %}dark{% endif %}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -39,10 +39,30 @@
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@1.9.11"></script>
     <style>
-        body { background-color: #F8F5F2; }
+        :root {
+            --app-accent: {{ session.theme_color|default("#D4F67B") }};
+        }
+        body { 
+            background-color: #F8F5F2; 
+            color: #0F1113;
+        }
+        .dark body { 
+            background-color: #0F1113; 
+            color: #F8F5F2;
+        }
+        
+        #app-container { 
+            background-color: #F8F5F2; 
+        }
+        .dark #app-container { 
+            background-color: #1A1D1F; 
+        }
+
         @media (min-width: 640px) {
             body { background-color: #EAE6E1; }
+            .dark body { background-color: #090A0B; }
             #app-container { background-color: #F8F5F2; }
+            .dark #app-container { background-color: #1A1D1F; }
         }
         
         .custom-checkbox {
@@ -58,9 +78,13 @@
             background-color: white;
             flex-shrink: 0;
         }
+        .dark .custom-checkbox {
+            background-color: #2D3135;
+            border-color: #3F444D;
+        }
         .custom-checkbox:checked {
-            background-color: #0F0F0F;
-            border-color: #0F0F0F;
+            background-color: var(--app-accent);
+            border-color: var(--app-accent);
         }
         .custom-checkbox:checked::after {
             content: '';
@@ -69,7 +93,7 @@
             top: 4px;
             width: 5px;
             height: 10px;
-            border: solid white;
+            border: solid #0F1113;
             border-width: 0 2.5px 2.5px 0;
             transform: rotate(45deg);
         }
@@ -82,14 +106,18 @@
             font-size: 1.125rem;
             font-weight: 600;
             outline: none;
-            transition: border-color 0.2s;
-            color: #0F0F0F;
+            transition: all 0.2s;
+            color: #0F1113;
+        }
+        .dark .material-input {
+            border-bottom-color: #3F444D;
+            color: white;
         }
         .material-input::placeholder { color: #A0AEC0; font-weight: 500; }
-        .material-input:focus { border-bottom-color: #0F0F0F; }
+        .material-input:focus { border-bottom-color: var(--app-accent); }
         
         .main-btn {
-            background-color: #0F0F0F;
+            background-color: #0F1113;
             color: white;
             border-radius: 9999px;
             padding: 1rem 2rem;
@@ -101,6 +129,10 @@
             transition: transform 0.1s;
             box-shadow: 0 4px 14px rgba(0,0,0,0.1);
             width: 100%;
+        }
+        .dark .main-btn {
+            background-color: var(--app-accent);
+            color: #0F1113;
         }
         .main-btn:active { transform: scale(0.96); }
         
@@ -130,17 +162,18 @@
                 <a href="/grocy/{% if active_tab == 'admin' %}dashboard{% else %}{{ active_tab }}{% endif %}" class="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-app-black hover:-translate-x-1 transition-transform">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
                 </a>
-                <h1 class="text-xl font-bold tracking-tight">{% block header_title %}Wstecz{% endblock %}</h1>
+                <h1 class="text-xl font-bold tracking-tight">{% block header_title %}{{ __('back') }}{% endblock %}</h1>
             </div>
             {% if session.user_id %}
-                <a href="/grocy/settings" class="w-10 h-10 rounded-full bg-app-black text-white flex items-center justify-center font-bold shadow-md cursor-pointer hover:bg-gray-800 transition-all active:scale-90 overflow-hidden">
+            <div class="flex items-center gap-3">
+                <a href="/grocy/settings" class="w-10 h-10 bg-white/20 dark:bg-white/10 rounded-full flex items-center justify-center border border-white/10 shadow-inner overflow-hidden hover:bg-white/30 transition-all">
                     {% if session.avatar and session.avatar|length > 2 %}
                         <div class="w-full h-full bg-cover bg-center" style="background-image: url('/grocy/uploads/{{ session.avatar }}')"></div>
                     {% else %}
-                        {{ session.avatar|default(session.username|first|upper) }}
+                        <span class="text-base text-white font-bold">{{ session.avatar|default(session.username|first|upper) }}</span>
                     {% endif %}
                 </a>
-            {% endif %}
+            </div>{% endif %}
         </header>
         {% endif %}
 

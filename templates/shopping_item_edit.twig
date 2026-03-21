@@ -1,28 +1,28 @@
 {% extends "layout.twig" %}
-{% block header_title %}Edytuj Produkt{% endblock %}
+{% block header_title %}{{ __('edit_product') }}{% endblock %}
 {% block content %}
 <div class="mb-8 mt-2">
-    <div class="inline-block bg-app-lime px-4 py-1.5 rounded-full mb-3 text-black text-[11px] font-black uppercase tracking-widest shadow-sm">Korekta</div>
-    <h2 class="text-[36px] font-black text-app-black tracking-tighter leading-none">Modyfikuj Przedmiot</h2>
+    <div class="inline-block bg-app-lime dark:bg-app-accent px-4 py-1.5 rounded-full mb-3 text-black text-[11px] font-black uppercase tracking-widest shadow-sm">{{ __('Korekta') }}</div>
+    <h2 class="text-[36px] font-black text-app-black dark:text-white tracking-tighter leading-none">{{ __('modify_item') }}</h2>
 </div>
 
-<form action="/grocy/shopping/item/{{ item.id }}/edit" method="post" enctype="multipart/form-data" class="bg-white rounded-[32px] p-6 shadow-sm border border-gray-100/50 space-y-6">
+<form action="/grocy/shopping/item/{{ item.id }}/edit" method="post" enctype="multipart/form-data" class="bg-white dark:bg-[#1A1D1F] rounded-[32px] p-6 shadow-sm border border-gray-100/50 dark:border-white/5 space-y-6">
     <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Nazwa Produktu</label>
-        <input type="text" name="name" value="{{ item.name }}" required class="w-full bg-gray-50 rounded-2xl border-none outline-none font-bold text-app-black px-4 py-3 text-[16px] focus:ring-2 focus:ring-app-black transition-all shadow-inner">
+        <label class="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ __('product_name') }}</label>
+        <input type="text" name="name" value="{{ item.name }}" required class="w-full bg-gray-50 dark:bg-gray-800 rounded-2xl border-none outline-none font-bold text-app-black dark:text-white px-4 py-3 text-[16px] focus:ring-2 focus:ring-app-black dark:focus:ring-app-accent transition-all shadow-inner">
     </div>
     
     <div>
-        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-2">Zdjęcie Produktu</label>
+        <label class="block text-[11px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">{{ __('product_image') }}</label>
         {% if item.image %}
-            <div class="w-full h-32 rounded-2xl bg-gray-100 mb-3 bg-cover bg-center" style="background-image: url('/grocy/uploads/{{ item.image }}')"></div>
+            <div class="w-full h-32 rounded-2xl bg-gray-100 dark:bg-gray-800 mb-3 bg-cover bg-center border border-gray-100 dark:border-white/5" style="background-image: url('/grocy/uploads/{{ item.image }}')"></div>
         {% endif %}
-        <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-gray-100 file:text-app-black hover:file:bg-gray-200 cursor-pointer">
+        <input type="file" name="image" accept="image/*" class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-gray-100 dark:file:bg-gray-800 file:text-app-black dark:file:text-white hover:file:bg-gray-200 dark:hover:file:bg-gray-700 cursor-pointer">
     </div>
     
     <div class="pt-4">
-        <button type="submit" class="w-full bg-app-lime text-black py-4 rounded-full font-black uppercase tracking-widest text-[13px] hover:-translate-y-1 active:scale-95 transition-transform shadow-lg">
-            Zatwierdź Zmiany
+        <button type="submit" class="w-full bg-app-black dark:bg-app-accent text-white dark:text-app-black py-4 rounded-full font-black uppercase tracking-widest text-[13px] hover:-translate-y-1 active:scale-95 transition-transform shadow-lg">
+            {{ __('confirm_changes') }}
         </button>
     </div>
 </form>
