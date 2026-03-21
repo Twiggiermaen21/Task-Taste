@@ -79,6 +79,12 @@
             transition: all 0.2s;
             background-color: white;
             flex-shrink: 0;
+            outline: none;
+        }
+        .custom-checkbox:focus {
+            outline: 3px solid var(--app-accent);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 4px rgba(0,0,0,0.1);
         }
         .dark .custom-checkbox {
             background-color: #2D3135;
