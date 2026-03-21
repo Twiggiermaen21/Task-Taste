@@ -232,20 +232,5 @@
         {% endif %}
         
     </div>
-    <script>
-        document.addEventListener('change', function(e) {
-            if (e.target.type === 'file' && e.target.name === 'image') {
-                const file = e.target.files[0];
-                if (file) {
-                    const label = e.target.closest('label') || e.target.parentElement;
-                    const span = label.querySelector('span');
-                    if (span) {
-                        span.textContent = '📸 ' + file.name.substring(0, 15) + (file.name.length > 15 ? '...' : '');
-                        label.classList.add('ring-2', 'ring-app-accent');
-                    }
-                }
-            }
-        });
-    </script>
 </body>
 </html>

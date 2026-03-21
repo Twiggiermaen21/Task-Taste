@@ -17,11 +17,6 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
 
     $group->delete('/tasks/group/{id}', function (Request $request, Response $response, $args) use ($pdo) {
         $id = (int) $args['id'];
-        $stmt = $pdo->prepare("SELECT image FROM tasks WHERE group_id = ?");
-        $stmt->execute([$id]);
-        while ($img = $stmt->fetchColumn()) {
-            deleteUploadedFile($img);
-        }
         $pdo->prepare("DELETE FROM task_groups WHERE id = ? AND user_id = ?")->execute([$id, $_SESSION['user_id']]);
         return $response->withHeader('HX-Redirect', '/tasks')->withStatus(302);
     });
@@ -63,10 +58,9 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
             $description = trim($data['description'] ?? '');
             $color = trim($data['color'] ?? '');
             $due_date = trim($data['due_date'] ?? '');
-            $image = handleUpload($request, 'image');
 
             if ($title !== '') {
-                $pdo->prepare("INSERT INTO tasks (group_id, title, description, color, due_date, image) VALUES (?, ?, ?, ?, ?, ?)")->execute([$id, $title, $description, $color, $due_date, $image]);
+                $pdo->prepare("INSERT INTO tasks (group_id, title, description, color, due_date) VALUES (?, ?, ?, ?, ?)")->execute([$id, $title, $description, $color, $due_date]);
             }
         }
         $stmt2 = $pdo->prepare("SELECT t.*, tg.name as group_name FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.group_id = ? ORDER BY t.is_completed ASC, t.due_date ASC");
@@ -86,7 +80,6 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         $stmt = $pdo->prepare("SELECT t.image, t.group_id FROM tasks t JOIN task_groups tg ON t.group_id = tg.id WHERE t.id = ? AND tg.user_id = ?");
         $stmt->execute([$id, $_SESSION['user_id']]);
         if ($task = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            deleteUploadedFile($task['image']);
             $pdo->prepare("DELETE FROM tasks WHERE id = ?")->execute([$id]);
             $g_id = $task['group_id'];
 
@@ -134,16 +127,9 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
             $description = trim($data['description'] ?? '');
             $color = trim($data['color'] ?? '');
             $due_date = trim($data['due_date'] ?? '');
-            $newImage = handleUpload($request, 'image');
 
-            if ($newImage) {
-                deleteUploadedFile($task['image']);
-                $pdo->prepare("UPDATE tasks SET title = ?, description = ?, color = ?, due_date = ?, image = ? WHERE id = ?")
-                    ->execute([$title, $description, $color, $due_date, $newImage, $id]);
-            } else {
-                $pdo->prepare("UPDATE tasks SET title = ?, description = ?, color = ?, due_date = ? WHERE id = ?")
-                    ->execute([$title, $description, $color, $due_date, $id]);
-            }
+            $pdo->prepare("UPDATE tasks SET title = ?, description = ?, color = ?, due_date = ? WHERE id = ?")
+                ->execute([$title, $description, $color, $due_date, $id]);
             return $response->withHeader('Location', '/tasks/' . $task['group_id'])->withStatus(302);
         }
         return $response->withHeader('Location', '/tasks')->withStatus(302);

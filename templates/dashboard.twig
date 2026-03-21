@@ -7,11 +7,7 @@
         <div>
             <div class="flex items-center gap-3 mb-1">
                 <a href="/settings" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center border border-white/10 shadow-inner overflow-hidden hover:bg-white/30 transition-all active:scale-95">
-                    {% if session.avatar and session.avatar|length > 2 %}
-                        <div class="w-full h-full bg-cover bg-center" style="background-image: url('/uploads/{{ session.avatar }}')"></div>
-                    {% else %}
-                        <span class="text-base font-bold">{{ session.avatar|default(session.username|first|upper) }}</span>
-                    {% endif %}
+                    <span class="text-base font-bold">{{ session.avatar|default(session.username|first|upper) }}</span>
                 </a>
                 <span class="text-white/60 text-sm font-semibold tracking-wide">{{ __('my_stats') }}</span>
             </div>
@@ -90,14 +86,10 @@
         {% for task in dashboard.urgent_tasks %}
             <a href="/tasks/{{ task.group_id }}" class="bg-white dark:bg-[#1A1D1F] rounded-3xl p-4 flex items-center gap-4 shadow-sm border border-gray-100/50 dark:border-white/5 hover:shadow-md transition-shadow">
                 
-                <!-- Category colored icon or Task Image -->
-                {% if task.image %}
-                    <div class="w-12 h-12 rounded-2xl shrink-0 bg-cover bg-center border border-gray-100 dark:border-white/5" style="background-image: url('/uploads/{{ task.image }}')"></div>
-                {% else %}
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0" style="background-color: {{ task.color|default('#F0F0F0') }}40;">
-                        <span style="font-size: 20px;">📅</span>
-                    </div>
-                {% endif %}
+                <!-- Category colored icon -->
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl shrink-0" style="background-color: {{ task.color|default('#F0F0F0') }}40;">
+                    <span style="font-size: 20px;">📅</span>
+                </div>
                 
                 <div class="flex-1 overflow-hidden flex flex-col justify-center">
                     <strong class="block text-[15px] font-bold truncate tracking-tight text-app-black dark:text-white leading-tight mb-0.5">{{ task.title }}</strong>

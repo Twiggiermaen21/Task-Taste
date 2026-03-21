@@ -13,7 +13,7 @@
     </div>
 </div>
 
-<form hx-post="/tasks/{{ group.id }}/task" hx-encoding="multipart/form-data" hx-target="#tasks-list" class="mb-8" onsubmit="setTimeout(()=>this.reset(), 10)">
+<form hx-post="/tasks/{{ group.id }}/task" hx-target="#tasks-list" class="mb-8" onsubmit="setTimeout(()=>this.reset(), 10)">
     <div class="bg-white rounded-[28px] p-5 shadow-[0_8px_30px_rgba(0,0,0,0.04)] border border-gray-100/50 mb-3 space-y-4">
         <input type="text" name="title" placeholder="Nowe zadanie..." required class="w-full bg-transparent border-none outline-none font-bold text-app-black placeholder-gray-400 text-[18px]">
         
@@ -24,12 +24,6 @@
         <div class="flex gap-2 pt-2 items-center">
             <input type="date" name="due_date" class="bg-gray-50 text-app-black rounded-xl px-4 py-3 text-[14px] font-bold border border-gray-100 outline-none w-full shadow-inner">
             <input type="color" name="color" value="#E2D5FC" class="w-12 h-12 rounded-xl cursor-pointer border-0 shadow-inner overflow-hidden p-0 bg-transparent shrink-0">
-        </div>
-        
-        <div class="h-px bg-gray-100"></div>
-        
-        <div>
-            <input type="file" name="image" accept="image/*" class="text-[11px] text-gray-500 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-[11px] file:font-bold file:bg-gray-50 file:text-app-black hover:file:bg-gray-100 transition-colors w-full cursor-pointer outline-none">
         </div>
     </div>
     <button type="submit" class="w-full bg-app-black text-white py-4 rounded-full font-bold uppercase tracking-widest text-[13px] flex items-center justify-center gap-2 hover:-translate-y-1 active:scale-95 transition-transform shadow-[0_8px_20px_rgba(0,0,0,0.15)]">
@@ -53,8 +47,6 @@
             <div class="w-12 h-1.5 bg-gray-100 dark:bg-white/10 rounded-full"></div>
         </div>
         
-        <div id="task-modal-image" class="w-full h-48 rounded-[32px] bg-gray-100 dark:bg-gray-800 mb-6 bg-cover bg-center shadow-inner hidden"></div>
-        
         <div class="flex items-center gap-3 mb-2">
             <span id="task-modal-color" class="w-3 h-3 rounded-full"></span>
             <span id="task-modal-group" class="text-[11px] font-black uppercase tracking-widest text-gray-400"></span>
@@ -77,19 +69,11 @@
 </div>
 
 <script>
-function openTaskModal(title, group, date, color, image, desc) {
+function openTaskModal(title, group, date, color, desc) {
     document.getElementById('task-modal-title').innerText = title;
     document.getElementById('task-modal-group').innerText = group;
     document.getElementById('task-modal-date').innerText = date || 'Brak terminu';
     document.getElementById('task-modal-color').style.backgroundColor = color || '#CBD5E0';
-    
-    const imageEl = document.getElementById('task-modal-image');
-    if (image && image !== 'null' && image !== '') {
-        imageEl.style.backgroundImage = `url('/uploads/${image}')`;
-        imageEl.classList.remove('hidden');
-    } else {
-        imageEl.classList.add('hidden');
-    }
     
     const descEl = document.getElementById('task-modal-desc');
     const descContainer = document.getElementById('task-modal-desc-container');

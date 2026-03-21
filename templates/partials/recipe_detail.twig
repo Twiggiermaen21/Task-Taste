@@ -1,17 +1,7 @@
-{% if recipe.image %}
-<div class="w-full h-64 rounded-[40px] bg-gray-100 mb-6 bg-cover bg-center shadow-inner relative overflow-hidden" style="background-image: url('/uploads/{{ recipe.image }}')">
-    <div class="absolute inset-0 bg-gradient-to-t from-app-black/90 via-app-black/20 to-transparent flex items-end p-6">
-        <h2 class="text-white text-[32px] font-black tracking-tighter leading-tight relative z-10">{{ recipe.title }}</h2>
-    </div>
-</div>
-{% endif %}
-
 <div class="mb-8 flex justify-between items-start">
     <div>
         <div class="inline-block bg-app-yellow px-4 py-1.5 rounded-full mb-3 text-black text-[11px] font-black uppercase tracking-widest shadow-sm">Przepis</div>
-        {% if not recipe.image %}
-            <h2 class="text-[36px] font-black text-app-black dark:text-white tracking-tighter leading-none">{{ recipe.title }}</h2>
-        {% endif %}
+        <h2 class="text-[36px] font-black text-app-black dark:text-white tracking-tighter leading-none">{{ recipe.title }}</h2>
     </div>
 
     <div class="flex items-center gap-2 mt-2">

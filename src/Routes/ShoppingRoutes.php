@@ -29,12 +29,6 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         $stmt = $pdo->prepare("SELECT id FROM stores WHERE id = ? AND user_id = ?");
         $stmt->execute([$id, $_SESSION['user_id']]);
         if ($store = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            // Delete all item images associated with this store
-            $stmtItems = $pdo->prepare("SELECT image FROM shopping_items WHERE store_id = ?");
-            $stmtItems->execute([$id]);
-            while ($img = $stmtItems->fetchColumn()) {
-                deleteUploadedFile($img);
-            }
             $pdo->prepare("DELETE FROM stores WHERE id = ?")->execute([$id]);
         }
         return $response->withHeader('HX-Redirect', '/shopping')->withStatus(302);
@@ -91,9 +85,8 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         $check->execute([$store_id, $_SESSION['user_id']]);
         if ($check->fetch()) {
             $name = trim($request->getParsedBody()['name'] ?? '');
-            $image = handleUpload($request, 'image');
             if ($name !== '') {
-                $pdo->prepare("INSERT INTO shopping_items (store_id, name, image) VALUES (?, ?, ?)")->execute([$store_id, $name, $image]);
+                $pdo->prepare("INSERT INTO shopping_items (store_id, name) VALUES (?, ?)")->execute([$store_id, $name]);
             }
         }
         $stmt2 = $pdo->prepare("SELECT * FROM shopping_items WHERE store_id = ? ORDER BY is_completed ASC, id DESC");
@@ -106,7 +99,6 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         $stmt = $pdo->prepare("SELECT si.image, si.store_id FROM shopping_items si JOIN stores s ON si.store_id = s.id WHERE si.id = ? AND s.user_id = ?");
         $stmt->execute([$id, $_SESSION['user_id']]);
         if ($item = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            deleteUploadedFile($item['image']);
             $pdo->prepare("DELETE FROM shopping_items WHERE id = ?")->execute([$id]);
             $store_id = $item['store_id'];
             $stmt3 = $pdo->prepare("SELECT * FROM shopping_items WHERE store_id = ? ORDER BY is_completed ASC, id DESC");
@@ -138,14 +130,8 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         if ($item = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $data = $request->getParsedBody();
             $name = trim($data['name'] ?? '');
-            $newImage = handleUpload($request, 'image');
 
-            if ($newImage) {
-                deleteUploadedFile($item['image']);
-                $pdo->prepare("UPDATE shopping_items SET name = ?, image = ? WHERE id = ?")->execute([$name, $newImage, $id]);
-            } else {
-                $pdo->prepare("UPDATE shopping_items SET name = ? WHERE id = ?")->execute([$name, $id]);
-            }
+            $pdo->prepare("UPDATE shopping_items SET name = ? WHERE id = ?")->execute([$name, $id]);
             return $response->withHeader('Location', '/shopping/' . $item['store_id'])->withStatus(302);
         }
         return $response->withStatus(404);

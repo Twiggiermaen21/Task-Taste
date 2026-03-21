@@ -25,11 +25,9 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         $title = trim($data['title'] ?? '');
         $instructions = trim($data['instructions'] ?? '');
         $category = trim($data['category'] ?? 'Inne');
-        $image = handleUpload($request, 'image');
-
         if ($title !== '') {
-            $stmt = $pdo->prepare("INSERT INTO recipes (title, instructions, category, image, user_id) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$title, $instructions, $category, $image, $_SESSION['user_id']]);
+            $stmt = $pdo->prepare("INSERT INTO recipes (title, instructions, category, user_id) VALUES (?, ?, ?, ?)");
+            $stmt->execute([$title, $instructions, $category, $_SESSION['user_id']]);
         }
         return Twig::fromRequest($request)->render($response, 'partials/recipes_content.twig', [
             'grouped_recipes' => getRecipes($pdo, $_SESSION['user_id']),
@@ -42,7 +40,6 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         $stmt = $pdo->prepare("SELECT image FROM recipes WHERE id = ? AND user_id = ?");
         $stmt->execute([$id, $_SESSION['user_id']]);
         if ($recipe = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            deleteUploadedFile($recipe['image']);
             $pdo->prepare("DELETE FROM recipes WHERE id = ?")->execute([$id]);
         }
         return $response->withHeader('HX-Redirect', '/recipes')->withStatus(302);
@@ -72,14 +69,8 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
             $title = trim($data['title'] ?? '');
             $instructions = trim($data['instructions'] ?? '');
             $category = trim($data['category'] ?? 'Inne');
-            $newImage = handleUpload($request, 'image');
 
-            if ($newImage) {
-                deleteUploadedFile($recipe['image']);
-                $pdo->prepare("UPDATE recipes SET title = ?, instructions = ?, category = ?, image = ? WHERE id = ?")->execute([$title, $instructions, $category, $newImage, $id]);
-            } else {
-                $pdo->prepare("UPDATE recipes SET title = ?, instructions = ?, category = ? WHERE id = ?")->execute([$title, $instructions, $category, $id]);
-            }
+            $pdo->prepare("UPDATE recipes SET title = ?, instructions = ?, category = ? WHERE id = ?")->execute([$title, $instructions, $category, $id]);
         }
         return $response->withHeader('Location', '/recipes/' . $id)->withStatus(302);
     });

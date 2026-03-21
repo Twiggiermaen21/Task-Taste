@@ -6,9 +6,7 @@
                 <input type="checkbox" {% if item.is_completed %}checked{% endif %} class="custom-checkbox" hx-patch="/shopping/item/{{ item.id }}/toggle" hx-target="#shopping-items">
             </label>
             
-            {% if item.image %}
-            <div class="w-12 h-12 rounded-[14px] bg-gray-100 shrink-0 bg-cover bg-center border border-gray-100" style="background-image: url('/uploads/{{ item.image }}')"></div>
-            {% endif %}
+
 
             <div class="flex-1 overflow-hidden">
                 <span class="text-[16px] font-bold text-app-black dark:text-white truncate w-full transition-all {% if item.is_completed %}line-through text-gray-400 dark:text-gray-500{% endif %}">

@@ -2,13 +2,6 @@
 {% block header_title %}Szczegóły{% endblock %}
 {% block content %}
 
-{% if recipe.image %}
-<div class="w-full h-64 rounded-[40px] bg-gray-100 mb-6 bg-cover bg-center shadow-inner relative overflow-hidden" style="background-image: url('/uploads/{{ recipe.image }}')">
-    <div class="absolute inset-0 bg-gradient-to-t from-app-black/90 via-app-black/20 to-transparent flex items-end p-6">
-        <h2 class="text-white text-[32px] font-black tracking-tighter leading-tight relative z-10">{{ recipe.title }}</h2>
-    </div>
-</div>
-{% endif %}
 
 <div class="mb-8 flex justify-between items-start">
     <div>
@@ -22,7 +15,7 @@
         <a href="/recipes/{{ recipe.id }}/edit" class="bg-gray-100 text-app-black w-10 h-10 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors" title="Edytuj">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
         </a>
-        <button hx-delete="/recipes/{{ recipe.id }}" hx-confirm="Trwale usunąć ten przepis ze zdjęciem?" class="bg-red-50 text-red-600 w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-100 transition-colors" title="Usuń">
+        <button hx-delete="/recipes/{{ recipe.id }}" hx-confirm="Trwale usunąć ten przepis?" class="bg-red-50 text-red-600 w-10 h-10 rounded-full flex items-center justify-center hover:bg-red-100 transition-colors" title="Usuń">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
         </button>
     </div>
