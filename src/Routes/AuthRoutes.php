@@ -5,7 +5,8 @@ use Slim\Views\Twig;
 
 return function ($app, PDO $pdo) {
     $app->get('/login', function (Request $request, Response $response) {
-        if (isset($_SESSION['user_id'])) return $response->withHeader('Location', '/grocy/dashboard')->withStatus(302);
+        if (isset($_SESSION['user_id']))
+            return $response->withHeader('Location', '/dashboard')->withStatus(302);
         return Twig::fromRequest($request)->render($response, 'auth/login.twig', ['active_tab' => 'login']);
     });
 
@@ -24,18 +25,19 @@ return function ($app, PDO $pdo) {
             }
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
-            $_SESSION['is_admin'] = (bool)$user['is_admin'];
+            $_SESSION['is_admin'] = (bool) $user['is_admin'];
             $_SESSION['theme_color'] = $user['theme_color'];
             $_SESSION['language'] = $user['language'];
             $_SESSION['avatar'] = $user['avatar'];
             $_SESSION['theme_mode'] = $user['theme_mode'] ?? 'light';
-            return $response->withHeader('Location', '/grocy/dashboard')->withStatus(302);
+            return $response->withHeader('Location', '/dashboard')->withStatus(302);
         }
         return Twig::fromRequest($request)->render($response, 'auth/login.twig', ['error' => 'Nieprawidłowy e-mail lub hasło.']);
     });
 
     $app->get('/register', function (Request $request, Response $response) {
-        if (isset($_SESSION['user_id'])) return $response->withHeader('Location', '/grocy/dashboard')->withStatus(302);
+        if (isset($_SESSION['user_id']))
+            return $response->withHeader('Location', '/dashboard')->withStatus(302);
         return Twig::fromRequest($request)->render($response, 'auth/register.twig', ['active_tab' => 'register']);
     });
 
@@ -56,7 +58,7 @@ return function ($app, PDO $pdo) {
                 $_SESSION['user_id'] = $pdo->lastInsertId();
                 $_SESSION['username'] = $username;
                 $_SESSION['is_admin'] = $isAdmin;
-                return $response->withHeader('Location', '/grocy/dashboard')->withStatus(302);
+                return $response->withHeader('Location', '/dashboard')->withStatus(302);
             } catch (PDOException $e) {
                 return Twig::fromRequest($request)->render($response, 'auth/register.twig', ['error' => 'Ten E-mail lub Nazwa użytkownika jest już zajęta.']);
             }
@@ -66,6 +68,6 @@ return function ($app, PDO $pdo) {
 
     $app->get('/logout', function (Request $request, Response $response) {
         session_destroy();
-        return $response->withHeader('Location', '/grocy/login')->withStatus(302);
+        return $response->withHeader('Location', '/login')->withStatus(302);
     });
 };

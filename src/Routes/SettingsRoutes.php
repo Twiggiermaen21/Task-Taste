@@ -35,6 +35,6 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         $_SESSION['theme_mode'] = $mode;
         $_SESSION['avatar'] = $finalAvatar;
 
-        return $response->withHeader('Location', '/grocy/settings')->withStatus(302);
+        return $response->withHeader('Location', '/settings')->withStatus(302);
     });
 };

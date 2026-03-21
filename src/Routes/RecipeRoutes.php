@@ -26,7 +26,7 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         $instructions = trim($data['instructions'] ?? '');
         $category = trim($data['category'] ?? 'Inne');
         $image = handleUpload($request, 'image');
-        
+
         if ($title !== '') {
             $stmt = $pdo->prepare("INSERT INTO recipes (title, instructions, category, image, user_id) VALUES (?, ?, ?, ?, ?)");
             $stmt->execute([$title, $instructions, $category, $image, $_SESSION['user_id']]);
@@ -45,23 +45,24 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
             deleteUploadedFile($recipe['image']);
             $pdo->prepare("DELETE FROM recipes WHERE id = ?")->execute([$id]);
         }
-        return $response->withHeader('HX-Redirect', '/grocy/recipes')->withStatus(302);
+        return $response->withHeader('HX-Redirect', '/recipes')->withStatus(302);
     });
-    
+
     $group->get('/recipes/{id}/edit', function (Request $request, Response $response, $args) use ($pdo) {
         $id = (int) $args['id'];
         $stmt = $pdo->prepare("SELECT * FROM recipes WHERE id = ? AND user_id = ?");
         $stmt->execute([$id, $_SESSION['user_id']]);
         $recipe = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$recipe) return $response->withHeader('Location', '/grocy/recipes')->withStatus(302);
-        
+        if (!$recipe)
+            return $response->withHeader('Location', '/recipes')->withStatus(302);
+
         return Twig::fromRequest($request)->render($response, 'recipe_edit.twig', [
             'recipe' => $recipe,
             'active_tab' => 'recipes',
             'is_detail_view' => true
         ]);
     });
-    
+
     $group->post('/recipes/{id}/edit', function (Request $request, Response $response, $args) use ($pdo) {
         $id = (int) $args['id'];
         $stmt = $pdo->prepare("SELECT image FROM recipes WHERE id = ? AND user_id = ?");
@@ -80,7 +81,7 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
                 $pdo->prepare("UPDATE recipes SET title = ?, instructions = ?, category = ? WHERE id = ?")->execute([$title, $instructions, $category, $id]);
             }
         }
-        return $response->withHeader('Location', '/grocy/recipes/' . $id)->withStatus(302);
+        return $response->withHeader('Location', '/recipes/' . $id)->withStatus(302);
     });
 
     $group->get('/recipes/{id}', function (Request $request, Response $response, $args) use ($pdo) {
@@ -88,7 +89,8 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         $stmt = $pdo->prepare("SELECT * FROM recipes WHERE id = ? AND user_id = ?");
         $stmt->execute([$id, $_SESSION['user_id']]);
         $recipe = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$recipe) return $response->withHeader('Location', '/grocy/recipes')->withStatus(302);
+        if (!$recipe)
+            return $response->withHeader('Location', '/recipes')->withStatus(302);
 
         $stmt2 = $pdo->prepare("SELECT * FROM recipe_ingredients WHERE recipe_id = ? ORDER BY id ASC");
         $stmt2->execute([$id]);
@@ -96,13 +98,14 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
 
         if ($request->hasHeader('HX-Request')) {
             return Twig::fromRequest($request)->render($response, 'partials/recipe_detail.twig', [
-                'recipe' => $recipe, 'ingredients' => $ingredients
+                'recipe' => $recipe,
+                'ingredients' => $ingredients
             ]);
         }
 
         return Twig::fromRequest($request)->render($response, 'recipe_view.twig', [
-            'recipe' => $recipe, 
-            'ingredients' => $ingredients, 
+            'recipe' => $recipe,
+            'ingredients' => $ingredients,
             'active_tab' => 'recipes',
             'is_detail_view' => true
         ]);
@@ -114,7 +117,8 @@ return function (\Slim\Routing\RouteCollectorProxy $group, PDO $pdo) {
         $check->execute([$id, $_SESSION['user_id']]);
         if ($check->fetch()) {
             $name = trim($request->getParsedBody()['name'] ?? '');
-            if ($name !== '') $pdo->prepare("INSERT INTO recipe_ingredients (recipe_id, name) VALUES (?, ?)")->execute([$id, $name]);
+            if ($name !== '')
+                $pdo->prepare("INSERT INTO recipe_ingredients (recipe_id, name) VALUES (?, ?)")->execute([$id, $name]);
         }
         $stmt2 = $pdo->prepare("SELECT * FROM recipe_ingredients WHERE recipe_id = ? ORDER BY id ASC");
         $stmt2->execute([$id]);
