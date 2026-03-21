@@ -11,7 +11,11 @@
                             <input type="checkbox" {% if task.is_completed %}checked{% endif %} class="custom-checkbox" hx-patch="/tasks/item/{{ task.id }}/toggle" hx-target="#tasks-list">
                         </label>
                         
-                        <div class="flex-1 min-w-0 cursor-pointer z-10" onclick="openTaskModal('{{ task.title|e('js') }}', '{{ group|e('js') }}', '{{ task.due_date }}', '{{ task.color }}')">
+                        {% if task.image %}
+                        <div class="w-12 h-12 rounded-[14px] bg-gray-100 dark:bg-gray-800 shrink-0 bg-cover bg-center border border-gray-100 dark:border-white/5" style="background-image: url('/uploads/{{ task.image }}')"></div>
+                        {% endif %}
+                        
+                        <div class="flex-1 min-w-0 cursor-pointer z-10" onclick="openTaskModal('{{ task.title|e('js') }}', '{{ group|e('js') }}', '{{ task.due_date }}', '{{ task.color }}', '{{ task.image }}', '{{ task.description|e('js') }}')">
                             <strong class="block text-[16px] font-bold truncate tracking-tight text-app-black dark:text-white leading-tight mb-0.5 {% if task.is_completed %}line-through text-gray-400 dark:text-gray-500{% endif %}">
                                 {{ task.title }}
                             </strong>
