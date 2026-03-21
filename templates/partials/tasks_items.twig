@@ -5,10 +5,10 @@
             
             <div class="flex flex-col gap-3">
                 {% for task in items %}
-                    <div class="bg-white dark:bg-[#1A1D1F] rounded-[28px] p-4 flex items-center gap-4 shadow-sm border-2 transition-all {% if task.is_completed %}border-app-accent bg-app-accent/5 opacity-90{% else %}border-gray-100/50 dark:border-white/5 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]{% endif %} group pointer-events-auto relative overflow-hidden">
+                    <div class="bg-white dark:bg-[#1A1D1F] rounded-[28px] p-4 flex items-center gap-4 shadow-sm border-2 transition-all {% if task.is_completed %}border-app-accent/30 bg-app-accent/5 opacity-50{% else %}border-gray-100/50 dark:border-white/5 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]{% endif %} group pointer-events-auto relative overflow-hidden">
                         
                         <label class="shrink-0 flex items-center p-2 cursor-pointer z-20">
-                            <input type="checkbox" {% if task.is_completed %}checked{% endif %} class="custom-checkbox" hx-patch="/tasks/item/{{ task.id }}/toggle" hx-target="#tasks-list">
+                            <input type="checkbox" {% if task.is_completed %}checked{% endif %} class="custom-checkbox" hx-patch="/tasks/{{ task.id }}/toggle" hx-target="#tasks-list">
                         </label>
                         
                         <div class="flex-1 min-w-0 cursor-pointer z-10" onclick="openTaskModal('{{ task.title|e('js') }}', '{{ group|e('js') }}', '{{ task.due_date }}', '{{ task.color }}', '{{ task.description|e('js') }}')">
