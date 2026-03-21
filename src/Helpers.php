@@ -98,3 +98,55 @@ function getTaskGroups(PDO $pdo, int $userId): array {
     $stmt->execute([$userId]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+function __($key) {
+    if (!isset($_SESSION['language'])) {
+        $_SESSION['language'] = 'pl';
+    }
+    $lang = $_SESSION['language'];
+    $translations = [
+        'pl' => [
+            'dashboard' => 'Pulpit',
+            'shopping_list' => 'Lista Zakupów',
+            'recipes' => 'Przepisy',
+            'tasks' => 'Zadania',
+            'settings' => 'Ustawienia',
+            'add' => 'Dodaj',
+            'edit' => 'Edytuj',
+            'delete' => 'Usuń',
+            'logout' => 'Wyloguj',
+            'my_stats' => 'Moje Statystyki',
+            'urgent_tasks' => 'Najpilniejsze Zadania',
+            'welcome' => 'Witaj',
+            'what_to_buy' => 'Co kupujesz?',
+            'new_discount' => 'Nowy dyskont...',
+            'your_market' => 'Twój Rynek',
+            'save_changes' => 'Zapisz Zmiany',
+            'open_lists' => 'Masz %d otwarte listy',
+            'items' => 'Przedmiotów',
+            'pending_gaps' => 'Zaległe braki'
+        ],
+        'en' => [
+            'dashboard' => 'Dashboard',
+            'shopping_list' => 'Shopping List',
+            'recipes' => 'Recipes',
+            'tasks' => 'Tasks',
+            'settings' => 'Settings',
+            'add' => 'Add',
+            'edit' => 'Edit',
+            'delete' => 'Delete',
+            'logout' => 'Log Out',
+            'my_stats' => 'My Stats',
+            'urgent_tasks' => 'Urgent Tasks',
+            'welcome' => 'Welcome',
+            'what_to_buy' => 'What to buy?',
+            'new_discount' => 'New store...',
+            'your_market' => 'Your Market',
+            'save_changes' => 'Save Changes',
+            'open_lists' => 'You have %d open lists',
+            'items' => 'Items',
+            'pending_gaps' => 'Pending Gaps'
+        ]
+    ];
+    return $translations[$lang][$key] ?? $key;
+}
