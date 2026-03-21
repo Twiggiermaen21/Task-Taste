@@ -36,15 +36,15 @@
         <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3">{{ __('appearance_mode') }}</label>
         <div class="grid grid-cols-2 gap-3">
             <label class="relative cursor-pointer">
-                <input type="radio" name="theme_mode" value="light" class="sr-only" {% if session.theme_mode == 'light' %}checked{% endif %}>
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl py-3 px-4 flex items-center justify-center gap-2 border-2 transition-all {% if session.theme_mode == 'light' %}border-black dark:border-white bg-white dark:bg-transparent{% else %}border-transparent{% endif %}">
+                <input type="radio" name="theme_mode" value="light" class="sr-only" {% if user_pref.theme_mode == 'light' %}checked{% endif %}>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl py-3 px-4 flex items-center justify-center gap-2 border-2 transition-all {% if user_pref.theme_mode == 'light' %}border-black dark:border-white bg-white dark:bg-transparent{% else %}border-transparent{% endif %}">
                     <span>☀️</span>
                     <span class="font-bold text-sm text-app-black dark:text-white">{{ __('light_mode') }}</span>
                 </div>
             </label>
             <label class="relative cursor-pointer">
-                <input type="radio" name="theme_mode" value="dark" class="sr-only" {% if session.theme_mode == 'dark' %}checked{% endif %}>
-                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl py-3 px-4 flex items-center justify-center gap-2 border-2 transition-all {% if session.theme_mode == 'dark' %}border-black dark:border-white bg-white dark:bg-transparent{% else %}border-transparent{% endif %}">
+                <input type="radio" name="theme_mode" value="dark" class="sr-only" {% if user_pref.theme_mode == 'dark' %}checked{% endif %}>
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-2xl py-3 px-4 flex items-center justify-center gap-2 border-2 transition-all {% if user_pref.theme_mode == 'dark' %}border-black dark:border-white bg-white dark:bg-transparent{% else %}border-transparent{% endif %}">
                     <span>🌙</span>
                     <span class="font-bold text-sm text-app-black dark:text-white">{{ __('dark_mode') }}</span>
                 </div>

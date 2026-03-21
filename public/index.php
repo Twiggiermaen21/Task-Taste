@@ -2,6 +2,14 @@
 session_start();
 
 use Psr\Http\Message\ResponseInterface as Response;
+
+// Default session values
+if (isset($_SESSION['user_id'])) {
+    if (!isset($_SESSION['theme_color'])) $_SESSION['theme_color'] = '#D4F67B';
+    if (!isset($_SESSION['language'])) $_SESSION['language'] = 'pl';
+    if (!isset($_SESSION['theme_mode'])) $_SESSION['theme_mode'] = 'light';
+    if (!isset($_SESSION['avatar'])) $_SESSION['avatar'] = '👤';
+}
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use Slim\Views\Twig;

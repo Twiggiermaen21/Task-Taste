@@ -13,6 +13,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -20,8 +21,9 @@
                     },
                     colors: {
                         'app-bg': '#F8F5F2',
-                        'app-black': '#0F0F0F',
+                        'app-black': '#0F1113',
                         'app-lime': '{{ session.theme_color|default("#D4F67B") }}',
+                        'app-accent': '{{ session.theme_color|default("#D4F67B") }}',
                         'app-purple': '#E2D5FC',
                         'app-yellow': '#FFF4CA',
                         'app-pink': '#FFDBDE',
@@ -153,16 +155,16 @@
 </head>
 <body class="text-app-black antialiased min-h-screen relative font-sans sm:flex sm:justify-center">
     
-    <div id="app-container" class="w-full max-w-md min-h-screen relative pb-28 shadow-2xl sm:rounded-3xl sm:my-4 sm:overflow-hidden bg-[#F8F5F2]">
+    <div id="app-container" class="w-full max-w-md min-h-screen relative pb-28 shadow-2xl sm:rounded-3xl sm:my-4 sm:overflow-hidden bg-[#F8F5F2] dark:bg-[#1A1D1F]">
         
         <!-- Top Bar (Minimalist) -->
         {% if active_tab != 'dashboard' and active_tab != 'login' and active_tab != 'register' %}
-        <header class="sticky top-0 z-20 bg-[#F8F5F2]/90 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+        <header class="sticky top-0 z-20 bg-[#F8F5F2]/90 dark:bg-[#1A1D1F]/90 backdrop-blur-md px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <a href="/grocy/{% if active_tab == 'admin' %}dashboard{% else %}{{ active_tab }}{% endif %}" class="w-10 h-10 bg-white rounded-full shadow-sm flex items-center justify-center text-app-black hover:-translate-x-1 transition-transform">
+                <a href="/grocy/{% if active_tab == 'admin' %}dashboard{% else %}{{ active_tab }}{% endif %}" class="w-10 h-10 bg-white dark:bg-white/10 rounded-full shadow-sm flex items-center justify-center text-app-black dark:text-white hover:-translate-x-1 transition-transform">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"></path></svg>
                 </a>
-                <h1 class="text-xl font-bold tracking-tight">{% block header_title %}{{ __('back') }}{% endblock %}</h1>
+                <h1 class="text-xl font-bold tracking-tight dark:text-white">{% block header_title %}{{ __('back') }}{% endblock %}</h1>
             </div>
             {% if session.user_id %}
             <div class="flex items-center gap-3">
@@ -184,7 +186,7 @@
         {% if session.user_id %}
         <!-- Floating Bottom Navigation (Like in the screenshot) -->
         <div class="fixed bottom-6 w-full max-w-md left-1/2 -translate-x-1/2 px-6 z-50 pointer-events-none">
-            <nav class="bg-white/95 backdrop-blur-md border border-gray-100 rounded-[30px] shadow-[0_15px_40px_rgba(0,0,0,0.12)] pointer-events-auto flex items-center justify-between p-2.5">
+            <nav class="bg-white/95 dark:bg-[#1A1D1F]/95 backdrop-blur-md border border-gray-100 dark:border-white/10 rounded-[30px] shadow-[0_15px_40px_rgba(0,0,0,0.12)] pointer-events-auto flex items-center justify-between p-2.5">
                 
                 <a href="/grocy/dashboard" class="relative group flex-1 flex justify-center items-center h-12 rounded-full transition-all {% if active_tab == 'dashboard' %}bg-app-black text-white shadow-md{% else %}text-gray-400 hover:text-app-black{% endif %}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
