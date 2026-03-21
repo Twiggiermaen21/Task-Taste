@@ -49,7 +49,6 @@ $pdo->exec("PRAGMA foreign_keys = ON;");
 
 // Slim App
 $app = AppFactory::create();
-// $app->setBasePath('/grocy');
 
 // Twig
 $twig = Twig::create(__DIR__ . '/../templates', ['cache' => false]);
@@ -64,7 +63,7 @@ $app->addErrorMiddleware(true, true, true);
 $authMiddleware = function (Request $request, RequestHandler $handler) {
     if (!isset($_SESSION['user_id'])) {
         $response = new \Slim\Psr7\Response();
-        return $response->withHeader('Location', '/grocy/login')->withStatus(302);
+        return $response->withHeader('Location', '/login')->withStatus(302);
     }
     return $handler->handle($request);
 };
@@ -72,7 +71,7 @@ $authMiddleware = function (Request $request, RequestHandler $handler) {
 $adminMiddleware = function (Request $request, RequestHandler $handler) {
     if (!isset($_SESSION['user_id']) || empty($_SESSION['is_admin'])) {
         $response = new \Slim\Psr7\Response();
-        return $response->withHeader('Location', '/grocy/')->withStatus(302);
+        return $response->withHeader('Location', '/')->withStatus(302);
     }
     return $handler->handle($request);
 };
@@ -81,7 +80,7 @@ $adminMiddleware = function (Request $request, RequestHandler $handler) {
 
 // Root Redirection
 $app->get('/', function (Request $request, Response $response) {
-    return $response->withHeader('Location', '/grocy/dashboard')->withStatus(302);
+    return $response->withHeader('Location', '/dashboard')->withStatus(302);
 });
 
 // Moduły Zewnętrzne i Autoryzacyjne
