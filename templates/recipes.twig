@@ -44,7 +44,7 @@
             <div class="w-12 h-1.5 bg-gray-200 dark:bg-white/10 rounded-full"></div>
         </div>
         
-        <div class="absolute top-6 right-6 z-30">
+        <div class="absolute top-3 right-6 z-30">
             <button onclick="closeRecipeModal()" class="w-10 h-10 bg-white/20 dark:bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-app-black dark:text-white border border-white/20 shadow-lg">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
             </button>
@@ -64,11 +64,12 @@
 function openRecipeModal() {
     const modal = document.getElementById('recipe-modal');
     const container = document.getElementById('recipe-modal-container');
-    const header = document.getElementById('main-header');
+    const nav = document.getElementById('bottom-nav');
     
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     if (header) header.classList.add('opacity-0', 'pointer-events-none');
+    if (nav) nav.classList.add('opacity-0', 'pointer-events-none', 'translate-y-10');
     
     setTimeout(() => {
         container.classList.remove('translate-y-full');
@@ -79,10 +80,12 @@ function closeRecipeModal() {
     const modal = document.getElementById('recipe-modal');
     const container = document.getElementById('recipe-modal-container');
     const header = document.getElementById('main-header');
+    const nav = document.getElementById('bottom-nav');
     
     container.classList.add('translate-y-full');
     document.body.style.overflow = '';
     if (header) header.classList.remove('opacity-0', 'pointer-events-none');
+    if (nav) nav.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-10');
     
     setTimeout(() => {
         modal.classList.add('hidden');

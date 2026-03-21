@@ -47,6 +47,12 @@
             <div class="w-12 h-1.5 bg-gray-100 dark:bg-white/10 rounded-full"></div>
         </div>
         
+        <div class="absolute top-3 right-6 z-30">
+            <button onclick="closeTaskModal()" class="w-10 h-10 bg-gray-100 dark:bg-white/10 rounded-full flex items-center justify-center text-app-black dark:text-white border border-gray-100 dark:border-white/5 shadow-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        
         <div class="flex items-center gap-3 mb-2">
             <span id="task-modal-color" class="w-3 h-3 rounded-full"></span>
             <span id="task-modal-group" class="text-[11px] font-black uppercase tracking-widest text-gray-400"></span>
@@ -87,10 +93,12 @@ function openTaskModal(title, group, date, color, desc) {
     const modal = document.getElementById('task-modal');
     const container = document.getElementById('task-modal-container');
     const header = document.getElementById('main-header');
+    const nav = document.getElementById('bottom-nav');
     
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     if (header) header.classList.add('opacity-0', 'pointer-events-none');
+    if (nav) nav.classList.add('opacity-0', 'pointer-events-none', 'translate-y-10');
     
     setTimeout(() => {
         container.classList.remove('translate-y-full');
@@ -101,10 +109,12 @@ function closeTaskModal() {
     const modal = document.getElementById('task-modal');
     const container = document.getElementById('task-modal-container');
     const header = document.getElementById('main-header');
+    const nav = document.getElementById('bottom-nav');
     
     container.classList.add('translate-y-full');
     document.body.style.overflow = '';
     if (header) header.classList.remove('opacity-0', 'pointer-events-none');
+    if (nav) nav.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-10');
     
     setTimeout(() => {
         modal.classList.add('hidden');

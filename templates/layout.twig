@@ -203,7 +203,7 @@
 
         {% if session.user_id %}
         <!-- Floating Bottom Navigation (Like in the screenshot) -->
-        <div class="fixed bottom-6 w-full max-w-md left-1/2 -translate-x-1/2 px-6 z-50 pointer-events-none">
+        <div id="bottom-nav" class="fixed bottom-6 w-full max-w-md left-1/2 -translate-x-1/2 px-6 z-50 pointer-events-none transition-all duration-300">
             <nav class="bg-white/95 dark:bg-[#1A1D1F]/95 backdrop-blur-md border border-gray-100 dark:border-white/10 rounded-[30px] shadow-[0_15px_40px_rgba(0,0,0,0.12)] pointer-events-auto flex items-center justify-between p-2.5">
                 
                 <a href="/dashboard" class="relative group flex-1 flex justify-center items-center h-12 rounded-full transition-all {% if active_tab == 'dashboard' %}bg-app-black text-white shadow-md{% else %}text-gray-400 hover:text-app-black{% endif %}">
