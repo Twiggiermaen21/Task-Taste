@@ -35,9 +35,9 @@ if (!is_dir($uploadsDir . '/avatars'))
     mkdir($uploadsDir . '/avatars', 0777, true);
 
 // Database connection
-$mongoUri = "mongodb://9582504a52a064f3:555fc12eafc9825c01daf70de1ca7260@mongo-0.task-taste-db--d6k8d9fr6tfs.addon.code.run:27017/62927e60bef8?replicaSet=rs0&authSource=62927e60bef8&tls=true";
+$mongoUri = getenv('MONGO_URI');
 $mongoClient = new MongoDB\Client($mongoUri);
-$db = $mongoClient->selectDatabase('62927e60bef8');
+$db = $mongoClient->selectDatabase(getenv('MONGO_DB_NAME'));
 
 // Slim App
 $app = AppFactory::create();
