@@ -36,10 +36,6 @@ $twig = Twig::create(__DIR__ . '/../templates', ['cache' => false]);
 $twig->getEnvironment()->addFunction(new \Twig\TwigFunction('__', function ($key, $replace = []) {
     return __($key, $replace);
 }));
-$app->add(TwigMiddleware::create($app, $twig));
-$app->add($userMiddleware);
-$app->addErrorMiddleware(true, true, true);
-
 // ==================== MIDDLEWARES ====================
 $userMiddleware = function (Request $request, RequestHandler $handler) use ($db, $twig) {
     if (isset($_SESSION['user_id'])) {
@@ -67,6 +63,11 @@ $adminMiddleware = function (Request $request, RequestHandler $handler) {
     }
     return $handler->handle($request);
 };
+
+// Slim App Middleware
+$app->add(TwigMiddleware::create($app, $twig));
+$app->add($userMiddleware);
+$app->addErrorMiddleware(true, true, true);
 
 // ==================== ROUTES ====================
 
