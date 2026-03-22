@@ -111,13 +111,21 @@ function getTaskGroups(\MongoDB\Database $db, string $userId): array
     return $groups;
 }
 
+class UserContext
+{
+    public static $user = null;
+    public static $language = 'pl';
+
+    public static function set($user)
+    {
+        self::$user = $user;
+        self::$language = $user['language'] ?? 'pl';
+    }
+}
+
 function __($key, $replace = [])
 {
-    // 1. Ustawienie domyślnego języka
-    if (!isset($_SESSION['language'])) {
-        $_SESSION['language'] = 'pl';
-    }
-    $lang = $_SESSION['language'];
+    $lang = UserContext::$language;
 
     // 2. Zmienna statyczna (pamięta pobrane tłumaczenia, żeby nie czytać pliku 100 razy)
     static $translations = [];

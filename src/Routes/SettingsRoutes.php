@@ -31,11 +31,6 @@ return function (\Slim\Routing\RouteCollectorProxy $group, \MongoDB\Database $db
             ]]
         );
 
-        $_SESSION['theme_color'] = $theme;
-        $_SESSION['language'] = $lang;
-        $_SESSION['theme_mode'] = $mode;
-        $_SESSION['avatar'] = $avatarEmoji;
-
         return $response->withHeader('Location', '/settings')->withStatus(302);
     });
 };

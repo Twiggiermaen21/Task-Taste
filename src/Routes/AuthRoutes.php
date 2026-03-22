@@ -29,10 +29,6 @@ return function ($app, \MongoDB\Database $db) {
             $_SESSION['user_id'] = (string) $user['_id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['is_admin'] = (bool) ($user['is_admin'] ?? false);
-            $_SESSION['theme_color'] = $user['theme_color'] ?? '#D4F67B';
-            $_SESSION['language'] = $user['language'] ?? 'pl';
-            $_SESSION['avatar'] = $user['avatar'] ?? '👤';
-            $_SESSION['theme_mode'] = $user['theme_mode'] ?? 'light';
             return $response->withHeader('Location', '/dashboard')->withStatus(302);
         }
         return Twig::fromRequest($request)->render($response, 'auth/login.twig', ['error' => 'Nieprawidłowy e-mail lub hasło.']);

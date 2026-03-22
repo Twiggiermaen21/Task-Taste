@@ -3,17 +3,6 @@ session_start();
 
 use Psr\Http\Message\ResponseInterface as Response;
 
-// Default session values
-if (isset($_SESSION['user_id'])) {
-    if (!isset($_SESSION['theme_color']))
-        $_SESSION['theme_color'] = '#D4F67B';
-    if (!isset($_SESSION['language']))
-        $_SESSION['language'] = 'pl';
-    if (!isset($_SESSION['theme_mode']))
-        $_SESSION['theme_mode'] = 'light';
-    if (!isset($_SESSION['avatar']))
-        $_SESSION['avatar'] = '👤';
-}
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 use Slim\Views\Twig;
@@ -44,14 +33,25 @@ $app = AppFactory::create();
 
 // Twig
 $twig = Twig::create(__DIR__ . '/../templates', ['cache' => false]);
-$twig->getEnvironment()->addGlobal('session', $_SESSION);
-$twig->getEnvironment()->addFunction(new \Twig\TwigFunction('__', function ($key) {
-    return __($key);
+$twig->getEnvironment()->addFunction(new \Twig\TwigFunction('__', function ($key, $replace = []) {
+    return __($key, $replace);
 }));
 $app->add(TwigMiddleware::create($app, $twig));
+$app->add($userMiddleware);
 $app->addErrorMiddleware(true, true, true);
 
 // ==================== MIDDLEWARES ====================
+$userMiddleware = function (Request $request, RequestHandler $handler) use ($db, $twig) {
+    if (isset($_SESSION['user_id'])) {
+        $user = $db->users->findOne(['_id' => new \MongoDB\BSON\ObjectId($_SESSION['user_id'])]);
+        if ($user) {
+            UserContext::set($user);
+            $twig->getEnvironment()->addGlobal('user', $user);
+        }
+    }
+    return $handler->handle($request);
+};
+
 $authMiddleware = function (Request $request, RequestHandler $handler) {
     if (!isset($_SESSION['user_id'])) {
         $response = new \Slim\Psr7\Response();
