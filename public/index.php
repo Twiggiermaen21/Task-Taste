@@ -33,18 +33,25 @@ $app = AppFactory::create();
 
 // Twig
 $twig = Twig::create(__DIR__ . '/../templates', ['cache' => false]);
+$twig->getEnvironment()->addGlobal('session', $_SESSION);
 $twig->getEnvironment()->addFunction(new \Twig\TwigFunction('__', function ($key, $replace = []) {
     return __($key, $replace);
 }));
 // ==================== MIDDLEWARES ====================
 $userMiddleware = function (Request $request, RequestHandler $handler) use ($db, $twig) {
     if (isset($_SESSION['user_id'])) {
-        $user = $db->users->findOne(['_id' => new \MongoDB\BSON\ObjectId($_SESSION['user_id'])]);
-        if ($user) {
-            UserContext::set($user);
-            $twig->getEnvironment()->addGlobal('user', $user);
+        try {
+            $user = $db->users->findOne(['_id' => new \MongoDB\BSON\ObjectId($_SESSION['user_id'])]);
+            if ($user) {
+                UserContext::set($user);
+                $twig->getEnvironment()->addGlobal('user', $user);
+            }
+        } catch (\Exception $e) {
+            // Log error if needed, but don't crash
         }
     }
+    // Ensure session global is always updated if anything changed in session (though rare)
+    $twig->getEnvironment()->addGlobal('session', $_SESSION);
     return $handler->handle($request);
 };
 
